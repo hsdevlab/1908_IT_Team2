@@ -5,6 +5,7 @@
 #include <QPixmap>
 #include <QDebug>
 #include <QPushButton>
+#include <QtNetwork/QTcpSocket>
 
 class Widget : public QWidget
 {
@@ -18,11 +19,16 @@ public:
 protected:
     void paintEvent(QPaintEvent *event);
 
+
 private:
-    QPushButton btn;
+//    QPushButton btn;
+    QTcpSocket *socket;
 
 signals:
-public slots:
+private slots:
+    void readyRead();
+    void connected();
+    void click(int);
 };
 
 #endif // WIDGET_H

@@ -52,7 +52,7 @@ void client::click(int id)
     switch(id)
     {
         case 0: // Connect Server
-            socket->connectToHost("192.168.100.38", 8888);
+            socket->connectToHost("192.168.100.38", 7777);
             break;
     };
 }
