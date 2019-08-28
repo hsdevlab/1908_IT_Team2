@@ -54,6 +54,12 @@ void speed::paintEvent(QPaintEvent *event){
     //속도 계산하는 로직 짜는데... 얘를 천천히 올라가도록 해야하고.....
     //-120도에서 120도 사이에서 왔다갔다 해야함.
 
+//    int speed;
+//    for(speed = -120; speed<120; speed++){
+//        painter.rotate(speed);
+
+
+//    }
     painter.rotate(6.0 * time.second() + time.msec()*0.006);
 
 //    painter.brushOrigin()

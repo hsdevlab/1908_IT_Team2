@@ -1,15 +1,14 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2019-08-27T13:34:37
+# Project created by QtCreator 2019-08-28T10:44:45
 #
 #-------------------------------------------------
 
 QT       += core gui
-#webkitwidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = Cluster
+TARGET = Sensor
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -27,13 +26,10 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        speed.cpp
+        widget.cpp
 
 HEADERS += \
-    speed.h
-
-FORMS += \
-        widget.ui
+        widget.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -41,5 +37,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    resources.qrc \
     resources.qrc
