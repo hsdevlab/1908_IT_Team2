@@ -10,6 +10,9 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#include "Engine.h"
+#include "FileManager.h"
+
 #define DEFAULT_PROTOCOL 0
 #define MAXLINE 100
 
@@ -29,7 +32,7 @@ void cluster_thread()
     //char* thread_name = (char*)data;
     int i = 0;
  
-    while (1)   // 0,1,2 까지만 loop 돌립니다.
+    while (i<3)   // 0,1,2 까지만 loop 돌립니다.
     {
         // 넘겨받은 쓰레드 이름과 
         // 현재 process id 와 thread id 를 함께 출력
@@ -40,25 +43,39 @@ void cluster_thread()
     }
 }
 
-void controller_thread()
+void controller_thread(int fd)
 {
 	pid_t pid;            // process id
     pthread_t tid;        // thread id
  
     pid = getpid();
     tid = pthread_self();
- 
-    char* thread_name = "Cluster";
-    int i = 0;
- 
-    while (i<10)   // 0,1,2 까지만 loop 돌립니다.
-    {
-        // 넘겨받은 쓰레드 이름과 
-        // 현재 process id 와 thread id 를 함께 출력
-        printf("[%s] pid:%u, tid:%x --- %d\n", thread_name, (unsigned int)pid, (unsigned int)tid, i);
-        i++;
-        sleep(1);  // 1초간 대기
-    }
+
+    char ctrl_Msg[20] = "[Accel] 0";
+    char ctrl_mode[10];
+    memset(ctrl_mode, 0x00, sizeof(ctrl_mode));
+    char ctrl_level[2];
+    memset(&ctrl_level, 0x00, sizeof(ctrl_level));
+
+    
+  
+    //while (1)
+    //{
+    	//readLine(fd,ctrl_Msg);
+    	char *ptr = strtok(ctrl_Msg, " ");
+
+    	printf("%s\n", ptr);
+    	memcpy(ctrl_mode, ptr, strlen(ptr) + 1);
+    	printf("%s\n", ctrl_mode);
+
+    	ptr = strtok(NULL," ");
+
+    	printf("%s\n", ptr);
+    	memcpy(ctrl_level, ptr, strlen(ptr) + 1);
+    	printf("%s\n", ctrl_level);
+
+        //sleep(1);  // 1초간 대기
+    //}
 }
 
 void engine_thread()
@@ -178,7 +195,7 @@ int main(int argc, char* argv[])
 		if(!(strcmp(inmsg,"cluster")))
 		{
 			printf("Cluster On\n");
-			cluster_tid=pthread_create(&pthread_cluster,NULL,cluster_thread,NULL);
+			cluster_tid=pthread_create(&pthread_cluster,NULL,cluster_thread,&connfd);
 			//cluster_tid=pthread_create(&pthread_cluster,NULL,cluster_thread,(void*)&a);
 			if(cluster_tid<0)
 			{
@@ -189,7 +206,7 @@ int main(int argc, char* argv[])
 		else if(!(strcmp(inmsg,"controller")))
 		{
 			printf("Controller On\n");
-			controller_tid=pthread_create(&pthread_controller,NULL,controller_thread,NULL);
+			controller_tid=pthread_create(&pthread_controller,NULL,controller_thread,&connfd);
 			//controller_tid=pthread_create(&pthread_controller,NULL,controller_thread,(void*)&a);
 			if(controller_tid<0)
 			{
