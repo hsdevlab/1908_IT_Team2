@@ -59,9 +59,9 @@ void controller_thread(int fd)
 
     
   
-    //while (1)
-    //{
-    	//readLine(fd,ctrl_Msg);
+    while (1)
+    {
+    	readLine(fd,ctrl_Msg);
     	char *ptr = strtok(ctrl_Msg, " ");
 
     	printf("%s\n", ptr);
@@ -74,8 +74,27 @@ void controller_thread(int fd)
     	memcpy(ctrl_level, ptr, strlen(ptr) + 1);
     	printf("%s\n", ctrl_level);
 
-        //sleep(1);  // 1초간 대기
-    //}
+    	if(strcmp(ctrl_mode, "[Accel]")){
+    		accel_val = atoi(ctrl_level);
+    		accelActuator();
+    		printf("[%c]current_speed : %d \n", gear, current_speed);
+    	}
+    	else if(strcmp(ctrl_mode, "[Break]")){
+    		break_val = atoi(ctrl_level);
+    		breakActuator();
+       		printf("[%c]current_speed : %d \n", gear, current_speed);
+    	}
+    	else if(strcmp(ctrl_mode, "[Gear]")){
+    		gear = ctrl_level[0];
+    		printf("[%c]Gear change..\n", gear);
+    	}
+    	else{
+    		// Inputed nothing.
+    	}
+
+    	free(ptr);
+        sleep(0.1);  // 1초간 대기
+    }
 }
 
 void engine_thread()
@@ -191,6 +210,7 @@ int main(int argc, char* argv[])
 		//readLine(connfd, inmsg);
 		//printf("%s\n",inmsg);
 		
+		controller_tid=pthread_create(&pthread_controller,NULL,controller_thread,&connfd);
 
 		if(!(strcmp(inmsg,"cluster")))
 		{
