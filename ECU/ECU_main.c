@@ -35,12 +35,11 @@ int break_val	 = 0; // 0, 1, 2, 3
 int wink_state 	 = 0; // 0: None, 1: Left, 2: right, 3: Warning
 int current_speed = 0;
 
-//char recv_msg[MAXLINE], send_msg[MAXLINE];
-
 int readLine(int fd, char* str);
 int logging(char* str);
 void* thRecver();
 void* thSender();
+void AddQueue(char *str, int iFdNum);
 
 /* 한 줄 읽기 */
 int readLine(int fd, char* str)
@@ -70,7 +69,7 @@ int logging(char* str) // 로깅
 
 void* thRecver(void *arg)
 {
-	char recv_msg[MAXLINE];
+	char recv_msg[MAXLINE], send_msg[MAXLINE];
 	int thr_arg = *((int *)arg);
 	fprintf(stderr, "t_recver\n");
 	while(1)
@@ -80,6 +79,7 @@ void* thRecver(void *arg)
 			continue;
 		}
 		memset(recv_msg, 0x00, sizeof(recv_msg));
+		memset(send_msg, 0x00, sizeof(send_msg));
 		int iLen = readLine(fdSock[thr_arg], recv_msg);
 		fprintf(stderr, "rcv");
 		sprintf(sLogging, "recv : %s\n", recv_msg); 		
@@ -89,44 +89,58 @@ void* thRecver(void *arg)
 		int command, content;
 		sscanf(recv_msg, "%d %d", &command, &content);
 
-		if(command == 0){
-			accel_val = content;
-			accelActuator();
-			printf("[Accel]----Current speed : %d----------\n", current_speed);
-			printf("[Accel]----Current gear  : %d----------\n", gear_state);
-		}else if(command == 1){
-			break_val = content;
-			breakActuator();
-			printf("[Break]----Current speed : %d----------\n", current_speed);
-			printf("[Break]----Current gear  : %d----------\n", gear_state);
-		}else if(command == 2){
-			gear_state = content;
-			printf("[Gear]-----Gear state changed: %d------\n", gear_state);
-		}else if(command == 3){
-			wink_state = content;
-			printf("wink !!!\n");
-		}else if(command == 4){
-			// TODO : Send music change signal.
-		}else if(command == 9){
-
-		}
-
-		iQueSavedIdx[thr_arg]++;
-		if(iQueSavedIdx[thr_arg] >= MAXQUEUECNT)
+		if(thr_arg == 0)
 		{
-			iQueSavedIdx[thr_arg] = 0;
-		}
-		sprintf(sQueue[thr_arg][iQueCurrentIdx[thr_arg]], "return:%s\n", recv_msg);
+			if(command == 0){
+				accel_val = content;
+				accelActuator();
+				printf("[Accel]----Current speed : %d----------\n", current_speed);
+				printf("[Accel]----Current gear  : %d----------\n", gear_state);
+			}else if(command == 1){
+				break_val = content;
+				breakActuator();
+				printf("[Break]----Current speed : %d----------\n", current_speed);
+				printf("[Break]----Current gear  : %d----------\n", gear_state);
+			}else if(command == 2){
+				gear_state = content;
+				printf("[Gear]-----Gear state changed: %d------\n", gear_state);
+			}else if(command == 3){
+				wink_state = content;
+				printf("wink !!!\n");
+			}else if(command == 4){
+				// TODO : Send music change signal.
+			}else if(command == 9){
 
-		if(iLen == 0)
-		{
-			printf("누구 접속 종료\n");
-			break;
+			}
+
+		
+			sprintf(send_msg,"0 %s\n",itoa(current_speed));
+			AddQueue(send_msg, 0);
+			sprintf(send_msg,"1 %s\n",itoa(current_total_distance));
+			AddQueue(send_msg, 0);
+			sprintf(send_msg,"2 %s\n",itoa(current_fuel));			
+			AddQueue(send_msg, 0);
+			sprintf(send_msg,"3 %s\n",itoa(gear_state));
+			AddQueue(send_msg, 0);
+			sprintf(send_msg,"4 %s\n",itoa(wink_state));
+			AddQueue(send_msg, 0);
+			//sprintf(send_msg,"5 %s",itoa(current_speed)); //Music Control information
+			//AddQueue(send_msg, 0);
 		}
-		sleep(1);
-		nonActuator();
 	}
 }
+
+void AddQueue(char *str, int iFdNum)
+{
+	sprintf(sQueue[iFdNum][iQueSavedIdx[iFdNum]], "%s\n", str);
+
+	iQueSavedIdx[iFdNum]++;
+	if(iQueSavedIdx[iFdNum] >= MAXQUEUECNT)
+	{
+		iQueSavedIdx[iFdNum] = 0;
+	}	
+}
+
 
 void* thSender()
 {	
@@ -140,7 +154,7 @@ void* thSender()
 			{
 				continue;
 			}
-			if(iQueCurrentIdx[i] != iQueSavedIdx[i])
+			while(iQueCurrentIdx[i] != iQueSavedIdx[i])
 			{
 				iLenSend=write(fdSock[i], sQueue[i][iQueCurrentIdx[i]], strlen(sQueue[i][iQueCurrentIdx[i]])+1);
 				sprintf(sLogging, "send : %s\n", sQueue[i][iQueCurrentIdx[i]]);
@@ -198,8 +212,6 @@ int main(int argc, char* argv[])
 	int thr_id[CLIENTCNT+1];	
 	pthread_t p_thread[CLIENTCNT+1];
 
-	//pthread_create(&p_thread[0], NULL, thRecver , NULL);			
-	//sleep(1);
 	thr_id[3] = pthread_create(&p_thread[3], NULL, thSender , NULL);
 
 	printf("SW ON\n");
