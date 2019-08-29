@@ -76,6 +76,7 @@ int logging(char* str) // 로깅
 
 void* naturalDeceleration()
 {
+	char *tmp_msg;
 	while(1)
 	{
 		printf("current speed : %d\n", current_speed);
@@ -87,14 +88,17 @@ void* naturalDeceleration()
 			increaseDistance();
 			dist_count++;
 			dist = 0.0;
-			// add queue (current_total_distance)
+			sprintf(tmp_msg,"1 %s\n",itoa(current_total_distance));
+			AddQueue(tmp_msg, 1);
 		}
 		if(dist_count >= FUEL_IFFICIENCY){
 			decreaseFuel();
 			dist_count = 0;
-			// add queue (current_fuel)
+			sprintf(tmp_msg,"2 %s\n",itoa(current_fuel));			
+			AddQueue(tmp_msg, 1);
 		}
-		// add queue (current_speed)
+		sprintf(tmp_msg,"0 %s\n",itoa(current_speed));
+		AddQueue(tmp_msg, 1);
 		sleep(1.0);
 	}
 }
@@ -121,7 +125,7 @@ void* thRecver(void *arg)
 		int command, content;
 		sscanf(recv_msg, "%d %d", &command, &content);
 
-		if(thr_arg == 0)
+		if(thr_arg == 1)
 		{
 			if(command == 0){
 				accel_val = content;
@@ -145,19 +149,12 @@ void* thRecver(void *arg)
 
 			}
 
-		
-			sprintf(send_msg,"0 %s\n",itoa(current_speed));
-			AddQueue(send_msg, 0);
-			sprintf(send_msg,"1 %s\n",itoa(current_total_distance));
-			AddQueue(send_msg, 0);
-			sprintf(send_msg,"2 %s\n",itoa(current_fuel));			
-			AddQueue(send_msg, 0);
 			sprintf(send_msg,"3 %s\n",itoa(gear_state));
-			AddQueue(send_msg, 0);
+			AddQueue(send_msg, 1);
 			sprintf(send_msg,"4 %s\n",itoa(wink_state));
-			AddQueue(send_msg, 0);
+			AddQueue(send_msg, 1);
 			//sprintf(send_msg,"5 %s",itoa(current_speed)); //Music Control information
-			//AddQueue(send_msg, 0);
+			//AddQueue(send_msg, 1);
 		}
 	}
 }
