@@ -88,16 +88,16 @@ void* naturalDeceleration()
 			increaseDistance();
 			dist_count++;
 			dist = 0.0;
-			sprintf(tmp_msg,"1 %s\n",itoa(current_total_distance));
+			sprintf(tmp_msg,"1 %s\n",current_total_distance);
 			AddQueue(tmp_msg, 1);
 		}
 		if(dist_count >= FUEL_IFFICIENCY){
 			decreaseFuel();
 			dist_count = 0;
-			sprintf(tmp_msg,"2 %s\n",itoa(current_fuel));			
+			sprintf(tmp_msg,"2 %s\n",current_fuel);			
 			AddQueue(tmp_msg, 1);
 		}
-		sprintf(tmp_msg,"0 %s\n",itoa(current_speed));
+		sprintf(tmp_msg,"0 %s\n",current_speed);
 		AddQueue(tmp_msg, 1);
 		sleep(1.0);
 	}
@@ -149,9 +149,9 @@ void* thRecver(void *arg)
 
 			}
 
-			sprintf(send_msg,"3 %s\n",itoa(gear_state));
+			sprintf(send_msg,"3 %d\n", gear_state);
 			AddQueue(send_msg, 1);
-			sprintf(send_msg,"4 %s\n",itoa(wink_state));
+			sprintf(send_msg,"4 %d\n", wink_state);
 			AddQueue(send_msg, 1);
 			//sprintf(send_msg,"5 %s",itoa(current_speed)); //Music Control information
 			//AddQueue(send_msg, 1);
