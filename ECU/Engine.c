@@ -1,9 +1,9 @@
 #include "Engine.h"
 
-void accelActuator(int g)
+void accelActuator()
 {
-	printf("g : %d\n", g);
-	switch(g)
+	printf("a\n");
+	switch(gear_state)
 	{
 		case 0:
 		case 1:

@@ -28,6 +28,13 @@ char sQueue[CLIENTCNT][MAXQUEUECNT][MAXLINE];
 int iQueCurrentIdx[CLIENTCNT];
 int iQueSavedIdx[CLIENTCNT];
 
+// Global variables
+int gear_state 	 = 0; // 0: P, 1: N, 2: R, 3: D
+int accel_val 	 = 0; // 0, 1, 2, 3
+int break_val	 = 0; // 0, 1, 2, 3
+int wink_state 	 = 0; // 0: None, 1: Left, 2: right, 3: Warning
+int current_speed = 0;
+
 //char recv_msg[MAXLINE], send_msg[MAXLINE];
 
 int readLine(int fd, char* str);
@@ -84,21 +91,24 @@ void* thRecver(void *arg)
 
 		if(command == 0){
 			accel_val = content;
-			accelActuator(gear_state);
-			printf("-----------current Speed : %d----------\n", current_speed);
-			printf("-----------current Gear  : %d----------\n", gear_state);
+			accelActuator();
+			printf("[Accel]----Current speed : %d----------\n", current_speed);
+			printf("[Accel]----Current gear  : %d----------\n", gear_state);
 		}else if(command == 1){
 			break_val = content;
 			breakActuator();
-			printf("break !!\n");
+			printf("[Break]----Current speed : %d----------\n", current_speed);
+			printf("[Break]----Current gear  : %d----------\n", gear_state);
 		}else if(command == 2){
 			gear_state = content;
-			printf("gear state: %d\n", gear_state);
+			printf("[Gear]-----Gear state changed: %d------\n", gear_state);
 		}else if(command == 3){
 			wink_state = content;
 			printf("wink !!!\n");
 		}else if(command == 4){
 			// TODO : Send music change signal.
+		}else if(command == 9){
+
 		}
 
 		iQueSavedIdx[thr_arg]++;
@@ -113,6 +123,8 @@ void* thRecver(void *arg)
 			printf("누구 접속 종료\n");
 			break;
 		}
+		sleep(1);
+		nonActuator();
 	}
 }
 
