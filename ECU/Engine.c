@@ -1,32 +1,35 @@
 #include "Engine.h"
 
-void accelActuator()
+void accelActuator(int g)
 {
-	switch(gear)
+	printf("g : %d\n", g);
+	switch(g)
 	{
-		case P:
-		case N:
-			printf("[Error] Error Message \n");
+		case 0:
+		case 1:
+			printf("Gear:%d \t[Error] Error Message \n", gear_state);
 			break;
-		case R:
-		case D:
+		case 2:
+		case 3:
+			printf("b\n");
 			if(current_speed + (accel_val*10) > MAX_SPEED)
 				current_speed = MAX_SPEED;
 			else
 				current_speed += 10 * accel_val; 
 			break;
 	}
+	printf("c\n");
 }
 
 void breakActuator()
 {
-	switch(gear)
+	switch(gear_state)
 	{
-		case P:
-		case N:
+		case 0:
+		case 1:
 			break;
-		case R:
-		case D:
+		case 2:
+		case 3:
 			if(current_speed - (20*break_val) < 0)
 				current_speed = 0;
 			else
@@ -37,13 +40,13 @@ void breakActuator()
 
 void nonActuator()
 {
-	switch(gear)
+	switch(gear_state)
 	{
-		case P:
-		case N:
+		case 0:
+		case 1:
 			break;
-		case R:
-		case D:
+		case 2:
+		case 3:
 			if(current_speed - 2 < 0)
 				current_speed = 0;
 			else
