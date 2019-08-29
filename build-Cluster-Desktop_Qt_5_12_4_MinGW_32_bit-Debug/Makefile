@@ -247,6 +247,8 @@ Makefile: ../Cluster/Cluster.pro D:/QT/5.12.4/mingw73_32/mkspecs/win32-g++/qmake
 		D:/QT/5.12.4/mingw73_32/mkspecs/features/yacc.prf \
 		D:/QT/5.12.4/mingw73_32/mkspecs/features/lex.prf \
 		../Cluster/Cluster.pro \
+		D:/QT/5.12.4/mingw73_32/lib/Qt5MultimediaWidgets.prl \
+		D:/QT/5.12.4/mingw73_32/lib/Qt5Multimedia.prl \
 		D:/QT/5.12.4/mingw73_32/lib/Qt5Widgets.prl \
 		D:/QT/5.12.4/mingw73_32/lib/Qt5Gui.prl \
 		D:/QT/5.12.4/mingw73_32/lib/Qt5Network.prl \
@@ -437,6 +439,8 @@ D:/QT/5.12.4/mingw73_32/mkspecs/features/exceptions.prf:
 D:/QT/5.12.4/mingw73_32/mkspecs/features/yacc.prf:
 D:/QT/5.12.4/mingw73_32/mkspecs/features/lex.prf:
 ../Cluster/Cluster.pro:
+D:/QT/5.12.4/mingw73_32/lib/Qt5MultimediaWidgets.prl:
+D:/QT/5.12.4/mingw73_32/lib/Qt5Multimedia.prl:
 D:/QT/5.12.4/mingw73_32/lib/Qt5Widgets.prl:
 D:/QT/5.12.4/mingw73_32/lib/Qt5Gui.prl:
 D:/QT/5.12.4/mingw73_32/lib/Qt5Network.prl:

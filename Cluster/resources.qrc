@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>cluster_1.PNG</file>
+        <file>Blank_cd.png</file>
+        <file>cluster_cd.PNG</file>
     </qresource>
 </RCC>

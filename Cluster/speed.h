@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QtNetwork/QTcpSocket>
+#include <QMediaPlayer>
 
 class speed : public QWidget
 {
@@ -10,6 +11,8 @@ class speed : public QWidget
 public:
     explicit speed(QWidget *parent = nullptr);
     QPixmap pixmap;
+    QPixmap cd;
+    QMediaPlayer *player;
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -21,7 +24,6 @@ signals:
 
 public slots:
     void readyRead();
-    void connected();
     void click(int);
 };
 

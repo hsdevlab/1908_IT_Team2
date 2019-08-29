@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network multimedia multimediawidgets
 #webkitwidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -26,10 +26,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        audio.cpp \
         main.cpp \
         speed.cpp
 
 HEADERS += \
+    audio.h \
     speed.h
 
 FORMS += \
@@ -43,3 +45,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     resources.qrc \
     resources.qrc
+
+DISTFILES += \
+    ../../../Users/MOBIS/Desktop/Blank_cd.png \
+    mp3/ICY.mp3 \
+    mp3/Stone_Of_Zion.mp3
