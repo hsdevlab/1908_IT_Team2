@@ -115,21 +115,30 @@ void* thRecver(void *arg)
 		{
 			continue;
 		}
+		printf("<Debug>0");
 		memset(recv_msg, 0x00, sizeof(recv_msg));
 		memset(send_msg, 0x00, sizeof(send_msg));
+		printf("<Debug>0.1");
+		printf("\t thr_arg : %d \t",thr_arg);
+		printf("\t recv_msg: %s \t", &recv_msg);
 		int iLen = readLine(fdSock[thr_arg], recv_msg);
+		printf("<Debug>0.2");
 		fprintf(stderr, "rcv");
-		sprintf(sLogging, "recv : %s\n", recv_msg); 		
+		printf("<Debug>0.3");
+		sprintf(sLogging, "recv : %s\n", recv_msg); 
+		printf("<Debug>0.4");		
 		logging(sLogging);
-
+		printf("<Debug>1");
 		// Preprocessing "recv_msg"
 		int command, content;
 		sscanf(recv_msg, "%d %d", &command, &content);
-
+		printf("<Debug>2");
 		if(thr_arg == 1)
 		{
+			printf("<Debug>3");
 			if(command == 0){
 				accel_val = content;
+				printf("<Debug>4");
 				accelActuator();
 				printf("[Accel]----Current speed : %d----------\n", current_speed);
 				printf("[Accel]----Current gear  : %d----------\n", gear_state);
@@ -140,9 +149,13 @@ void* thRecver(void *arg)
 				printf("[Break]----Current gear  : %d----------\n", gear_state);
 			}else if(command == 2){
 				gear_state = content;
+				sprintf(send_msg,"3 %d\n", gear_state);
+				AddQueue(send_msg, 1);
 				printf("[Gear]-----Gear state changed: %d------\n", gear_state);
 			}else if(command == 3){
 				wink_state = content;
+				sprintf(send_msg,"4 %d\n", wink_state);
+				AddQueue(send_msg, 1);
 				printf("wink !!!\n");
 			}else if(command == 4){
 				// TODO : Send music change signal.
@@ -150,10 +163,8 @@ void* thRecver(void *arg)
 
 			}
 
-			sprintf(send_msg,"3 %d\n", gear_state);
-			AddQueue(send_msg, 1);
-			sprintf(send_msg,"4 %d\n", wink_state);
-			AddQueue(send_msg, 1);
+			
+			
 			//sprintf(send_msg,"5 %s",itoa(current_speed)); //Music Control information
 			//AddQueue(send_msg, 1);
 		}
