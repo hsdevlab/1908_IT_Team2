@@ -78,7 +78,29 @@ void* thRecver(void *arg)
 		sprintf(sLogging, "recv : %s\n", recv_msg); 		
 		logging(sLogging);
 
-		func();
+		// Preprocessing "recv_msg"
+		int command, content;
+		sscanf(recv_msg, "%d %d", &command, &content);
+
+		if(command == 0){
+			accel_val = content;
+			accelActuator(gear_state);
+			printf("-----------current Speed : %d----------\n", current_speed);
+			printf("-----------current Gear  : %d----------\n", gear_state);
+		}else if(command == 1){
+			break_val = content;
+			breakActuator();
+			printf("break !!\n");
+		}else if(command == 2){
+			gear_state = content;
+			printf("gear state: %d\n", gear_state);
+		}else if(command == 3){
+			wink_state = content;
+			printf("wink !!!\n");
+		}else if(command == 4){
+			// TODO : Send music change signal.
+		}
+
 		iQueSavedIdx[thr_arg]++;
 		if(iQueSavedIdx[thr_arg] >= MAXQUEUECNT)
 		{
