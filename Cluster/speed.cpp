@@ -18,6 +18,18 @@ speed::speed(QWidget *parent) : QWidget(parent)
         exit(-1);
     }
 
+
+//    QLabel *currentTime = new QLabel("Timer", this);
+//    currentTime->setGeometry(20, 20, 200, 20);
+//    connect(currentTime, SIGNAL(timeout()), SLOT(displayClock()));
+//    timer->start(1000);
+//    resize(90, 40);
+
+    //시계
+    QLCDNumber *lcd = new QLCDNumber(8, this);
+    lcd->display(QString("%1").arg(QTime::currentTime().toString()));
+    lcd->setGeometry(230, 150, 100, 50);
+
     //속도계 바늘 설정
 
     //소켓 및 통신 설정, 서버에 메시지 전송
@@ -77,6 +89,15 @@ speed::speed(QWidget *parent) : QWidget(parent)
 
 
 }
+
+
+//void speed::displayClock(){
+//    //
+
+//    label->setText(QString("%1 %2").arg(QDate::currentDate().toString()).arg(QTime::currentTime().toString()));
+////    label->setText(QTime::currentTime().toString());
+
+//}
 
 
 void speed::paintEvent(QPaintEvent *event){
