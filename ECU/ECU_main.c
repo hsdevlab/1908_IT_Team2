@@ -136,6 +136,7 @@ int main(int argc, char* argv[])
 	int listenfd, connfd, clientlen;
 	int thr_arg;
 	char onoff_msg[20];
+	memset(onoff_msg, 0x00, sizeof(onoff_msg));
 	struct sockaddr_in serveraddr, clientaddr;	
 	struct hostent *hp;	
 	char *haddrp;	
