@@ -14,110 +14,26 @@
 #include "FileManager.h"
 
 #define DEFAULT_PROTOCOL 0
-#define MAXLINE 100
+#define MAXLINE 20
+#define CLIENTCNT 3
+#define MAXQUEUECNT 100
+
+int iListenPort; // 서버포트
+FILE* fp; // 로그 파일 포인터
+int fdSock[CLIENTCNT]; // 0:cluster, 1:controller, 2:engine
+char sLogging[100];
+
+// send 큐
+char sQueue[CLIENTCNT][MAXQUEUECNT][MAXLINE];
+int iQueCurrentIdx[CLIENTCNT];
+int iQueSavedIdx[CLIENTCNT];
+
+//char recv_msg[MAXLINE], send_msg[MAXLINE];
 
 int readLine(int fd, char* str);
-void cluster_thread();
-void controller_thread();
-void engine_thread();
-
-void cluster_thread()
-{
-	pid_t pid;            // process id
-    pthread_t tid;        // thread id
- 
-    pid = getpid();
-    tid = pthread_self();
- 
-    //char* thread_name = (char*)data;
-    int i = 0;
- 
-    while (i<3)   // 0,1,2 까지만 loop 돌립니다.
-    {
-        // 넘겨받은 쓰레드 이름과 
-        // 현재 process id 와 thread id 를 함께 출력
-        printf("pid:%u, tid:%x --- %d\n", (unsigned int)pid, (unsigned int)tid, i);
-		//printf("[%s] pid:%u, tid:%x --- %d\n", thread_name, (unsigned int)pid, (unsigned int)tid, i);
-        i++;
-        sleep(1);  // 1초간 대기
-    }
-}
-
-void controller_thread(int fd)
-{
-	pid_t pid;            // process id
-    pthread_t tid;        // thread id
- 
-    pid = getpid();
-    tid = pthread_self();
-
-    char ctrl_Msg[20] = "[Accel] 0";
-    char ctrl_mode[10];
-    memset(ctrl_mode, 0x00, sizeof(ctrl_mode));
-    char ctrl_level[2];
-    memset(&ctrl_level, 0x00, sizeof(ctrl_level));
-
-    
-  
-    while (1)
-    {
-    	readLine(fd,ctrl_Msg);
-    	char *ptr = strtok(ctrl_Msg, " ");
-
-    	printf("%s\n", ptr);
-    	memcpy(ctrl_mode, ptr, strlen(ptr) + 1);
-    	printf("%s\n", ctrl_mode);
-
-    	ptr = strtok(NULL," ");
-
-    	printf("%s\n", ptr);
-    	memcpy(ctrl_level, ptr, strlen(ptr) + 1);
-    	printf("%s\n", ctrl_level);
-
-    	if(strcmp(ctrl_mode, "[Accel]")){
-    		accel_val = atoi(ctrl_level);
-    		accelActuator();
-    		printf("[%c]current_speed : %d \n", gear, current_speed);
-    	}
-    	else if(strcmp(ctrl_mode, "[Break]")){
-    		break_val = atoi(ctrl_level);
-    		breakActuator();
-       		printf("[%c]current_speed : %d \n", gear, current_speed);
-    	}
-    	else if(strcmp(ctrl_mode, "[Gear]")){
-    		gear = ctrl_level[0];
-    		printf("[%c]Gear change..\n", gear);
-    	}
-    	else{
-    		// Inputed nothing.
-    	}
-
-    	free(ptr);
-        sleep(0.1);  // 1초간 대기
-    }
-}
-
-void engine_thread()
-{
-	pid_t pid;            // process id
-    pthread_t tid;        // thread id
- 
-    pid = getpid();
-    tid = pthread_self();
- 
-    //char* thread_name = (char*)data;
-    int i = 0;
- 
-    while (i<3)   // 0,1,2 까지만 loop 돌립니다.
-    {
-        // 넘겨받은 쓰레드 이름과 
-        // 현재 process id 와 thread id 를 함께 출력
-		printf("pid:%u, tid:%x --- %d\n", (unsigned int)pid, (unsigned int)tid, i);
-        //printf("[%s] pid:%u, tid:%x --- %d\n", thread_name, (unsigned int)pid, (unsigned int)tid, i);
-        i++;
-        sleep(1);  // 1초간 대기
-    }
-}
+int logging(char* str);
+void* thRecver();
+void* thSender();
 
 /* 한 줄 읽기 */
 int readLine(int fd, char* str)
@@ -131,121 +47,158 @@ int readLine(int fd, char* str)
 }
 
 
+int logging(char* str) // 로깅
+{	
+	fprintf(stderr, "logging\n");
+	// 로그 파일 열기
+	if((fp = fopen("ECU_log.txt","a"))==NULL)
+	{
+		fprintf(stderr, "file open error");
+		exit(1);
+	}
+	fprintf(fp,"log : %s\n", str);
+	fprintf(stderr, "log : %s\n", str);
+	fclose(fp);
+}
+
+void* thRecver(void *arg)
+{
+	char recv_msg[MAXLINE];
+	int thr_arg = *((int *)arg);
+	fprintf(stderr, "t_recver\n");
+	while(1)
+	{
+		if(fdSock[thr_arg] == NULL)
+		{
+			continue;
+		}
+		memset(recv_msg, 0x00, sizeof(recv_msg));
+		int iLen = readLine(fdSock[thr_arg], recv_msg);
+		fprintf(stderr, "rcv");
+		sprintf(sLogging, "recv : %s\n", recv_msg); 		
+		logging(sLogging);
+
+		func();
+		iQueSavedIdx[thr_arg]++;
+		if(iQueSavedIdx[thr_arg] >= MAXQUEUECNT)
+		{
+			iQueSavedIdx[thr_arg] = 0;
+		}
+		sprintf(sQueue[thr_arg][iQueCurrentIdx[thr_arg]], "return:%s\n", recv_msg);
+
+		if(iLen == 0)
+		{
+			printf("누구 접속 종료\n");
+			break;
+		}
+	}
+}
+
+void* thSender()
+{	
+	fprintf(stderr, "t_sender\n");
+	int iLenSend = 0;
+	while(1)
+	{
+		for(int i=0;i<CLIENTCNT;i++)
+		{
+			if(fdSock[i] == NULL)
+			{
+				continue;
+			}
+			if(iQueCurrentIdx[i] != iQueSavedIdx[i])
+			{
+				iLenSend=write(fdSock[i], sQueue[i][iQueCurrentIdx[i]], strlen(sQueue[i][iQueCurrentIdx[i]])+1);
+				sprintf(sLogging, "send : %s\n", sQueue[i][iQueCurrentIdx[i]]);
+				fprintf(stderr, "sended\n");
+				logging(sLogging);
+				iQueCurrentIdx[i]++;
+				if(iQueCurrentIdx[i] >= MAXQUEUECNT)
+				{
+					iQueCurrentIdx[i] = 0;
+				}
+			}
+		}
+	}
+}
+
+
 int main(int argc, char* argv[])
 {
-	int listenfd, connfd, port, clientlen;
-	FILE *fp;
-	char inmsg[MAXLINE], outmsg[MAXLINE];
-	struct sockaddr_in serveraddr, clientaddr;
-    struct hostent *hp;
-    char *haddrp;
+	if (argc != 2) {		
+		fprintf(stderr, "사용법: %s <port>\n", argv[0]);		
+		exit(0);	
+	}
 
-	memset(inmsg, 0x00, sizeof(inmsg));
-	memset(outmsg, 0x00, sizeof(outmsg));
+	iListenPort = atoi(argv[1]);
 
-	sprintf(outmsg, "Go\n"); 
+	// Socket 생성
+	int listenfd, connfd, clientlen;
+	int thr_arg;
+	struct sockaddr_in serveraddr, clientaddr;	
+	struct hostent *hp;	
+	char *haddrp;	
+	listenfd = socket(AF_INET, SOCK_STREAM, DEFAULT_PROTOCOL);
+	bzero((char *) &serveraddr, sizeof(serveraddr));	
+	serveraddr.sin_family = AF_INET;	
+	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);	
+	serveraddr.sin_port = htons((unsigned short)iListenPort);
 
-    signal(SIGCHLD, SIG_IGN);
+	int sockopt = 1;
+	if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &sockopt, sizeof(sockopt)) == -1) {
+		printf("Socket option = SO_REUSEADDR(on)\n");
+		exit(EXIT_FAILURE);
+	}
+	struct linger solinger = { 1, 0 };
+	if (setsockopt(listenfd, SOL_SOCKET, SO_LINGER, &solinger, sizeof(struct linger))
+			== -1) {
+		perror("setsockopt(SO_LINGER)");
+	}
 
-	int  cluster_tid;
-    pthread_t pthread_cluster;
+	bind(listenfd, &serveraddr, sizeof(serveraddr));
+	// Socket 생성 완료		
+	listen(listenfd, 5); // Socket 접속 대기
+	
+	int thr_id[2];	
+	pthread_t p_thread[2];
 
-	int  controller_tid;
-	pthread_t pthread_controller;
+	//pthread_create(&p_thread[0], NULL, thRecver , NULL);			
+	//sleep(1);
+	pthread_create(&p_thread[1], NULL, thSender , NULL);
 
-	int  engine_tid;
-	pthread_t pthread_engine;
+	printf("SW ON\n");
 
-	int recv_data, send_data;
-
-	int status;
-
-	port = atoi(argv[1]);
-
-    if((listenfd = socket(AF_INET, SOCK_STREAM, DEFAULT_PROTOCOL)) == -1)
-    {// 소켓 생성
-        printf("Server : Can't open stream socket\n");
-        exit(0);
-    }else printf("socket() pass\n");
-
-	bzero((char *) &serveraddr, sizeof(serveraddr));
-	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	serveraddr.sin_port = htons((unsigned short)port);
-    //serveraddr 셋팅
- 
-    if(bind(listenfd, &serveraddr, sizeof(serveraddr)) <0)
-    {//bind() 호출
-        printf("Server : Can't bind local address.\n");
-        exit(0);
-    }else printf("bind() pass\n");
- 
-    if(listen(listenfd, 5) < 0)
-    {//소켓을 수동 대기모드로 설정
-        printf("Server : Can't listening connect.\n");
-        exit(0);
-    }else printf("listen() pass\n");
-
-    while(1)
-    {
+	while (1)
+	{ /* 소켓 연결 요청 수락 */
 		clientlen = sizeof(clientaddr);
-		connfd = accept(listenfd, &clientaddr, &clientlen); 
-
-        if(connfd < 0)
-        {
-            printf("Server: accept failed.\n");
-            exit(0);
-        }else printf("Accept() pass\n");
-
-		/* 클라이언트의 도메인 이름과 IP 주소 결정 */
-		hp = gethostbyaddr((char *)&clientaddr.sin_addr.s_addr, sizeof(clientaddr.sin_addr.s_addr), AF_INET);
-		haddrp = inet_ntoa(clientaddr.sin_addr);
-//		printf("서버: %s (%s) %d에 연결됨\n", hp->h_name, haddrp, clientaddr.sin_port);
-
-		readLine(connfd, inmsg);
-		printf("%s\n",inmsg);
-
-		write(connfd, outmsg, strlen(outmsg)+1);
-
-		//readLine(connfd, inmsg);
-		//printf("%s\n",inmsg);
-		
-		controller_tid=pthread_create(&pthread_controller,NULL,controller_thread,&connfd);
+		connfd = accept(listenfd, &clientaddr, &clientlen);
+		hp = gethostbyaddr((char *)&clientaddr.sin_addr.s_addr,	sizeof(clientaddr.sin_addr.s_addr), AF_INET);
+		haddrp = inet_ntoa(clientaddr.sin_addr);	
+		fprintf(stderr, "accpeted\n");
 
 		if(!(strcmp(inmsg,"cluster")))
 		{
 			printf("Cluster On\n");
-			cluster_tid=pthread_create(&pthread_cluster,NULL,cluster_thread,&connfd);
-			//cluster_tid=pthread_create(&pthread_cluster,NULL,cluster_thread,(void*)&a);
-			if(cluster_tid<0)
-			{
-				perror("Cluster thread create error:");
-				exit(0);
-			}
+			fdSock[0] = connfd;
+			thr_arg = 0;
 		}
+
 		else if(!(strcmp(inmsg,"controller")))
 		{
 			printf("Controller On\n");
-			controller_tid=pthread_create(&pthread_controller,NULL,controller_thread,&connfd);
-			//controller_tid=pthread_create(&pthread_controller,NULL,controller_thread,(void*)&a);
-			if(controller_tid<0)
-			{
-				perror("Controller thread create error:");
-				exit(0);
-			}
+			fdSock[1] = connfd;
+			thr_arg = 1;
 		}
+
 		else if(!(strcmp(inmsg,"engine")))
 		{
 			printf("Engine On\n");
-			engine_tid=pthread_create(&pthread_engine,NULL,engine_thread,NULL);
-			//engine_tid=pthread_create(&pthread_engine,NULL,engine_thread,(void*)&a);
-			if(engine_tid<0)
-			{
-				perror("Engine thread create error:");
-				exit(0);
-			}
+			fdSock[2] = connfd;
+			thr_arg = 2;
 		}
+		pthread_create(&p_thread[0], NULL, thRecver , (void *)&thr_arg);
 
+		sleep(1);
 	}
 
 	close(connfd);
