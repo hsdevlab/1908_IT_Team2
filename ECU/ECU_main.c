@@ -135,6 +135,7 @@ int main(int argc, char* argv[])
 	// Socket 생성
 	int listenfd, connfd, clientlen;
 	int thr_arg;
+	char onoff_msg[20];
 	struct sockaddr_in serveraddr, clientaddr;	
 	struct hostent *hp;	
 	char *haddrp;	
@@ -159,12 +160,12 @@ int main(int argc, char* argv[])
 	// Socket 생성 완료		
 	listen(listenfd, 5); // Socket 접속 대기
 	
-	int thr_id[2];	
-	pthread_t p_thread[2];
+	int thr_id[CLIENTCNT+1];	
+	pthread_t p_thread[CLIENTCNT+1];
 
 	//pthread_create(&p_thread[0], NULL, thRecver , NULL);			
 	//sleep(1);
-	pthread_create(&p_thread[1], NULL, thSender , NULL);
+	thr_id[3] = pthread_create(&p_thread[3], NULL, thSender , NULL);
 
 	printf("SW ON\n");
 
@@ -176,27 +177,29 @@ int main(int argc, char* argv[])
 		haddrp = inet_ntoa(clientaddr.sin_addr);	
 		fprintf(stderr, "accpeted\n");
 
-		if(!(strcmp(inmsg,"cluster")))
+		readLine(connfd, onoff_msg);
+
+		if(!(strcmp(onoff_msg,"cluster")))
 		{
 			printf("Cluster On\n");
 			fdSock[0] = connfd;
 			thr_arg = 0;
 		}
 
-		else if(!(strcmp(inmsg,"controller")))
+		else if(!(strcmp(onoff_msg,"controller")))
 		{
 			printf("Controller On\n");
 			fdSock[1] = connfd;
 			thr_arg = 1;
 		}
 
-		else if(!(strcmp(inmsg,"engine")))
+		else if(!(strcmp(onoff_msg,"engine")))
 		{
 			printf("Engine On\n");
 			fdSock[2] = connfd;
 			thr_arg = 2;
 		}
-		pthread_create(&p_thread[0], NULL, thRecver , (void *)&thr_arg);
+		thr_id[thr_arg] = pthread_create(&p_thread[thr_arg], NULL, thRecver , (void *)&thr_arg);
 
 		sleep(1);
 	}
