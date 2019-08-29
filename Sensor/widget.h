@@ -27,7 +27,6 @@ private:
 signals:
 private slots:
     void readyRead();
-    void connected();
     void click(int);
 };
 

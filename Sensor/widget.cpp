@@ -20,17 +20,23 @@ Widget::Widget(QWidget *parent)
     //소켓 및 통신 설정
     socket = new QTcpSocket(this);
     connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
-    connect(socket, SIGNAL(connected()), this, SLOT(connected()));
 
 
     //방향지시등 버튼 그룹
     QButtonGroup *dirLight = new QButtonGroup(this);
+    QPushButton *offLight = new QPushButton("off", this);
     QPushButton *leftLight = new QPushButton("L", this);
     QPushButton *rightLight = new QPushButton("R", this);
+    QPushButton *bothLight = new QPushButton("LR light", this);
     leftLight->setGeometry(30, 130, 30, 30);
     rightLight->setGeometry(60, 60, 30, 30);
+    bothLight->setGeometry(450, 90, 70, 30);
+    offLight->setGeometry(35, 90, 30, 30);
+
     dirLight->addButton(leftLight, 11);
     dirLight->addButton(rightLight, 12);
+    dirLight->addButton(bothLight, 13);
+    dirLight->addButton(offLight, 10);
     connect(dirLight, SIGNAL(buttonClicked(int)), SLOT(click(int)));
 
 
@@ -99,11 +105,15 @@ Widget::Widget(QWidget *parent)
     connect(musicGroup, SIGNAL(buttonClicked(int)), SLOT(click(int)));
 
 
-    //비상등
-    QButtonGroup *alertGroup = new QButtonGroup(this);
-    QPushButton *alert = new QPushButton("ALERT", this);
-    alertGroup->addButton(alert, 61);
-    connect(alertGroup, SIGNAL(buttonClicked(int)), SLOT(click(int)));
+    //통신 시작 버튼
+    QButtonGroup *powerOn = new QButtonGroup(this);
+    QPushButton *controllerPowerOn = new QPushButton("START", this);
+    controllerPowerOn->setGeometry(450, 60, 70, 30);
+    powerOn->addButton(controllerPowerOn, 61);
+//    connect(socket, SIGNAL(connected()), this, SLOT(connected()));
+    connect(powerOn, SIGNAL(buttonClicked(int)), SLOT(click(int)));
+
+
 
 
 
@@ -133,18 +143,10 @@ void Widget::readyRead()
 }
 
 
-void Widget::connected()
-{
-    QString SendStr;
-    SendStr = QString("cluster");
-//    SendStr = QString("Connect QT");
-    socket->write(SendStr.toUtf8(), SendStr.length() + 1);
-}
-
 
 void Widget::click(int id)
 {
-    socket->connectToHost("192.168.100.49", 7777);
+//    socket->connectToHost("192.168.100.49", 7777);
     QPushButton* button = (QPushButton*)((QButtonGroup*)sender())->button(id);
     qDebug() << id;
     QString SendStr;
@@ -154,89 +156,99 @@ void Widget::click(int id)
 
 
          //방향지시등
+        case 10: //off lights
+            SendStr = QString("3 0");
+            socket->write(SendStr.toUtf8(), SendStr.length()+1);
+            break;
         case 11: // left lights
 //            QString SendStr;
 //            socket->connectToHost("10.0.2.15", 7777);
-            SendStr =QString("[Direction] 0");
+            SendStr =QString("3 1");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
         case 12: // right light
-            SendStr =QString("[Direction] 1");
+            SendStr =QString("3 2");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
-
+        case 13:
+            SendStr = QString("3 3"); //양쪽 깜박이
+            socket->write(SendStr.toUtf8(), SendStr.length() +1);
+            break;
             //21-24 브레이크
         case 21:
-            SendStr =QString("[Break] 0");
+            SendStr =QString("1 0");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
         case 22:
-            SendStr =QString("[Break] 1");
+            SendStr =QString("1 1");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
         case 23:
-            SendStr =QString("[Break] 2");
+            SendStr =QString("1 2");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
         case 24:
-            SendStr =QString("[Break] 3");
+            SendStr =QString("1 3");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
 
         //31-34 엑셀
         case 31:
-            SendStr =QString("[Accel] 0");
+            SendStr =QString("0 0");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
         case 32:
-            SendStr =QString("[Accel] 1");
+            SendStr =QString("0 1");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
         case 33:
-            SendStr =QString("[Accel] 2");
+            SendStr =QString("0 2");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
         case 34:
-            SendStr =QString("[Accel] 3");
+            SendStr =QString("0 3");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
 
         //41-44 기어
         case 41:
-            SendStr =QString("[Gear] P");
+            SendStr =QString("2 0");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
         case 42:
-            SendStr =QString("[Gear] N");
+            SendStr =QString("2 1");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
         case 43:
-            SendStr =QString("[Gear] R");
+            SendStr =QString("2 2");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
         case 44:
-            SendStr =QString("[Gear] D");
+            SendStr =QString("2 3");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
 
         //51-53 음악
         case 51:
-            SendStr =QString("[Music] 0");
+            SendStr =QString("4 0");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
         case 52:
-            SendStr =QString("[Music] 1");
+            SendStr =QString("4 1");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
        case 53:
-            SendStr =QString("[Music] 2");
+            SendStr =QString("4 2");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
-        //61 비상등
+
+       //통신 시작 버튼
         case 61:
-            SendStr =QString("[Alert] 0");
-            socket->write(SendStr.toUtf8(), SendStr.length() + 1);
+            socket->connectToHost("192.168.100.49", 7777);
+            SendStr = QString("controller");
+            socket->write(SendStr.toUtf8(), SendStr.length()+1);
             break;
+
 
     };
 }

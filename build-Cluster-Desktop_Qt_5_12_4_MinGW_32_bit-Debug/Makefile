@@ -249,6 +249,7 @@ Makefile: ../Cluster/Cluster.pro D:/QT/5.12.4/mingw73_32/mkspecs/win32-g++/qmake
 		../Cluster/Cluster.pro \
 		D:/QT/5.12.4/mingw73_32/lib/Qt5Widgets.prl \
 		D:/QT/5.12.4/mingw73_32/lib/Qt5Gui.prl \
+		D:/QT/5.12.4/mingw73_32/lib/Qt5Network.prl \
 		D:/QT/5.12.4/mingw73_32/lib/Qt5Core.prl \
 		D:/QT/5.12.4/mingw73_32/lib/qtmain.prl
 	$(QMAKE) -o Makefile ..\Cluster\Cluster.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug"
@@ -438,6 +439,7 @@ D:/QT/5.12.4/mingw73_32/mkspecs/features/lex.prf:
 ../Cluster/Cluster.pro:
 D:/QT/5.12.4/mingw73_32/lib/Qt5Widgets.prl:
 D:/QT/5.12.4/mingw73_32/lib/Qt5Gui.prl:
+D:/QT/5.12.4/mingw73_32/lib/Qt5Network.prl:
 D:/QT/5.12.4/mingw73_32/lib/Qt5Core.prl:
 D:/QT/5.12.4/mingw73_32/lib/qtmain.prl:
 qmake: FORCE

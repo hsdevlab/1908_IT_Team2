@@ -18,6 +18,12 @@ speed::speed(QWidget *parent) : QWidget(parent)
     }
     //속도계 바늘 설정
 
+    //소켓 및 통신 설정
+    socket = new QTcpSocket(this);
+    connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
+    connect(socket, SIGNAL(connected()), this, SLOT(connected()));
+
+
 }
 
 
@@ -112,6 +118,20 @@ void speed::paintEvent(QPaintEvent *event){
     //왼쪽 오른쪽 화살표
 
 }
+
+
+void speed::readyRead()
+{
+    while(socket->canReadLine())
+    {
+        QString line = QString::fromUtf8(socket->readLine()).trimmed();
+        qDebug() << line << "\n";
+    }
+}
+
+
+
+
 
 
 
