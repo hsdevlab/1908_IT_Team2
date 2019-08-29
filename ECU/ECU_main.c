@@ -77,9 +77,9 @@ int logging(char* str) // 로깅
 void* naturalDeceleration()
 {
 	char tmp_msg[20];
-	memset(tmp_msg, 0x00, sizeof(tmp_msg));
 	while(1)
 	{
+		memset(tmp_msg, 0x00, sizeof(tmp_msg));
 		printf("current speed : %d\n", current_speed);
 		nonActuator(); // -2km/h per second 
 		if(dist < 1){
@@ -89,16 +89,16 @@ void* naturalDeceleration()
 			increaseDistance();
 			dist_count++;
 			dist = 0.0;
-			sprintf(tmp_msg,"1 %s\n",current_total_distance);
+			sprintf(tmp_msg,"1 %d\n",current_total_distance);
 			AddQueue(tmp_msg, 1);
 		}
 		if(dist_count >= FUEL_IFFICIENCY){
 			decreaseFuel();
 			dist_count = 0;
-			sprintf(tmp_msg,"2 %s\n",current_fuel);			
+			sprintf(tmp_msg,"2 %d\n",current_fuel);			
 			AddQueue(tmp_msg, 1);
 		}
-		sprintf(tmp_msg,"0 %s\n",current_speed);
+		sprintf(tmp_msg,"0 %d\n",current_speed);
 		AddQueue(tmp_msg, 1);
 		sleep(1);
 	}
@@ -115,30 +115,21 @@ void* thRecver(void *arg)
 		{
 			continue;
 		}
-		printf("<Debug>0");
 		memset(recv_msg, 0x00, sizeof(recv_msg));
 		memset(send_msg, 0x00, sizeof(send_msg));
-		printf("<Debug>0.1");
-		printf("\t thr_arg : %d \t",thr_arg);
-		printf("\t recv_msg: %s \t", &recv_msg);
 		int iLen = readLine(fdSock[thr_arg], recv_msg);
-		printf("<Debug>0.2");
+		printf("\t recv_msg end: %s \n",recv_msg);
 		fprintf(stderr, "rcv");
-		printf("<Debug>0.3");
-		sprintf(sLogging, "recv : %s\n", recv_msg); 
-		printf("<Debug>0.4");		
+		sprintf(sLogging, "recv : %s\n", recv_msg); 		
 		logging(sLogging);
-		printf("<Debug>1");
+
 		// Preprocessing "recv_msg"
 		int command, content;
 		sscanf(recv_msg, "%d %d", &command, &content);
-		printf("<Debug>2");
 		if(thr_arg == 1)
 		{
-			printf("<Debug>3");
 			if(command == 0){
 				accel_val = content;
-				printf("<Debug>4");
 				accelActuator();
 				printf("[Accel]----Current speed : %d----------\n", current_speed);
 				printf("[Accel]----Current gear  : %d----------\n", gear_state);
@@ -252,8 +243,7 @@ int main(int argc, char* argv[])
 	
 	int thr_id[CLIENTCNT+1];	
 	pthread_t p_thread[CLIENTCNT+1];
-	pthread_t nD_thread;
-	// pthread_create(&p_thread[0], NULL, thRecver , NULL);			
+	pthread_t nD_thread;		
 
 	thr_id[3] = pthread_create(&p_thread[3], NULL, thSender , NULL);
 	sleep(1);

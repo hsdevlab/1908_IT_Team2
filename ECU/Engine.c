@@ -2,7 +2,6 @@
 
 void accelActuator()
 {
-	printf("a\n");
 	switch(gear_state)
 	{
 		case 0:
@@ -11,14 +10,12 @@ void accelActuator()
 			break;
 		case 2:
 		case 3:
-			printf("b\n");
 			if(current_speed + (accel_val*10) > MAX_SPEED)
 				current_speed = MAX_SPEED;
 			else
 				current_speed += 10 * accel_val; 
 			break;
 	}
-	printf("c\n");
 }
 
 void breakActuator()
