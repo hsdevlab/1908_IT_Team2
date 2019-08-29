@@ -76,7 +76,8 @@ int logging(char* str) // 로깅
 
 void* naturalDeceleration()
 {
-	char *tmp_msg;
+	char tmp_msg[20];
+	memset(tmp_msg, 0x00, sizeof(tmp_msg));
 	while(1)
 	{
 		printf("current speed : %d\n", current_speed);
@@ -99,7 +100,7 @@ void* naturalDeceleration()
 		}
 		sprintf(tmp_msg,"0 %s\n",current_speed);
 		AddQueue(tmp_msg, 1);
-		sleep(1.0);
+		sleep(1);
 	}
 }
 
