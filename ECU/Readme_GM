@@ -3,38 +3,42 @@
 
 <ECU -> Cluster>
 
-- 현재속도  => 0 xxx (km/h)
-- 주행거리  => 1 xxx (km)
+- 현재속도 => 0 xxx (km/h)
+- 주행거리 => 1 xxx (km)
 - 연료량   => 2 xxx (L)
 - 기어     => 3 x   
 	recv : ( 0,1,2,3 ) -> show : ( P, N, R, D )
 - 깜빡이   => 4 x
 	recv : ( 0, 1, 2 ) -> show : ( L, R, Both)
 - 음악     => 5 x
-	recv : ( 0,1,2,3 ) -> show : ( P, S, N, P )
+	recv : ( 0,1,2   ) -> show : ( P/S, N, P )
 
-
-<ECU -> Controller>
-
-- ACK/NACK (string)
 
 <ECU -> Engine>
 
 - 가속     => 0 x
 	x : 0, 1, 2, 3
 - 감속     => 1 x
-	x : 0, 1, 2, 3 (0은 자연 감속)
+	x : 0, 1, 2, 3 
 
 
+<ECU -> Controller>
+
+- ACK/NACK (string)
 
 
 ===========================================================================================
 
 
-
 <Cluster -> ECU>
 
 - ACK/NACK (string)
+
+
+<engine -> ECU>
+
+- 현재속도
+
 
 <Controller -> ECU>
 
@@ -47,8 +51,4 @@
 - 깜빡이   => 3 x
 	x : ( 0, 1, 2 ) -> ( L, R, Both)
 - 음악     => 4 x
-	x : ( 0,1,2,3 ) -> ( P, S, N, P )
-
-<engine -> ECU>
-
-- 현재속도
+	x : ( 0,1,2   ) -> ( P/S, N, P )
