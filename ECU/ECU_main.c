@@ -15,7 +15,7 @@
 
 #define DEFAULT_PROTOCOL 0
 #define MAXLINE 20
-#define CLIENTCNT 3
+#define CLIENTCNT 4
 #define MAXQUEUECNT 100
 
 int iListenPort; // 서버포트
@@ -34,6 +34,11 @@ int accel_val 	 = 0; // 0, 1, 2, 3
 int break_val	 = 0; // 0, 1, 2, 3
 int wink_state 	 = 0; // 0: None, 1: Left, 2: right, 3: Warning
 int current_speed = 0;
+int current_fuel;
+int current_total_distance;
+double dist = 0.0;
+int dist_count = 0;
+FILE *fp;
 
 //char recv_msg[MAXLINE], send_msg[MAXLINE];
 
@@ -41,6 +46,7 @@ int readLine(int fd, char* str);
 int logging(char* str);
 void* thRecver();
 void* thSender();
+void* naturalDeceleration();
 
 /* 한 줄 읽기 */
 int readLine(int fd, char* str)
@@ -66,6 +72,31 @@ int logging(char* str) // 로깅
 	fprintf(fp,"log : %s\n", str);
 	fprintf(stderr, "log : %s\n", str);
 	fclose(fp);
+}
+
+void* naturalDeceleration()
+{
+	while(1)
+	{
+		printf("current speed : %d\n", current_speed);
+		nonActuator(); // -2km/h per second 
+		if(dist < 1){
+			dist += current_speed / 3600;
+		}
+		if(dist >= 1){
+			increaseDistance();
+			dist_count++;
+			dist = 0.0;
+			// add queue (current_total_distance)
+		}
+		if(dist_count >= FUEL_IFFICIENCY){
+			decreaseFuel();
+			dist_count = 0;
+			// add queue (current_fuel)
+		}
+		// add queue (current_speed)
+		sleep(1.0);
+	}
 }
 
 void* thRecver(void *arg)
@@ -123,8 +154,6 @@ void* thRecver(void *arg)
 			printf("누구 접속 종료\n");
 			break;
 		}
-		sleep(1);
-		nonActuator();
 	}
 }
 
@@ -163,7 +192,7 @@ int main(int argc, char* argv[])
 		fprintf(stderr, "사용법: %s <port>\n", argv[0]);		
 		exit(0);	
 	}
-
+	loadFile();
 	iListenPort = atoi(argv[1]);
 
 	// Socket 생성
@@ -197,10 +226,12 @@ int main(int argc, char* argv[])
 	
 	int thr_id[CLIENTCNT+1];	
 	pthread_t p_thread[CLIENTCNT+1];
-
-	//pthread_create(&p_thread[0], NULL, thRecver , NULL);			
-	//sleep(1);
+	pthread_t nD_thread;
+	// pthread_create(&p_thread[0], NULL, thRecver , NULL);			
+	
 	thr_id[3] = pthread_create(&p_thread[3], NULL, thSender , NULL);
+	sleep(1);
+	pthread_create(&nD_thread, NULL, naturalDeceleration , NULL);
 
 	printf("SW ON\n");
 
