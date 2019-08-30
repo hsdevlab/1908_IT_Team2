@@ -12,7 +12,7 @@ speed::speed(QWidget *parent) : QWidget(parent)
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
     timer->start(10);
     //전체 윈도우 사이즈 조정
-    //755*565 pixel (클러스터 이미지 사이즈)
+    //756*563 pixel (클러스터 이미지 사이즈)
     this->setFixedSize(756, 563);
     if(!pixmap.load(":/cluster.PNG")){
         qDebug() << "unable to load img";
@@ -38,63 +38,42 @@ speed::speed(QWidget *parent) : QWidget(parent)
     fuelLabel = new QLabel(this);
     fuelLabel->setGeometry(300, 325, 200, 13);
     fuelLabel->setStyleSheet("QLabel {color: white;}");
-    //QString("%1").arg(fuel);
-//    fuelLabel->setText("hi");
-//    fuelLabel->setText(QString("%1").arg(fuel));
+
+    QLabel *L = new QLabel(this);
+    L->setGeometry(320, 325, 200, 13);
+    L->setText("L");
+    L->setStyleSheet("QLabel {color: white;}");
+    QLabel *km = new QLabel(this);
+    km->setGeometry(440, 325, 200, 13);
+    km->setText("km");
+    km->setStyleSheet("QLabel {color: white;}");
 
     //주행거리
 
     disLabel = new QLabel(this);
     disLabel->setGeometry(420, 325, 200, 13);
     disLabel->setStyleSheet("QLabel {color: white;}");
-    //QString("%1").arg(fuel);
-//    fuelLabel->setText("hi");
-//    disLabel->setText(QString("%1").arg(distance));
+
 
     //기어
 
-    QLabel *gearP = new QLabel(this);
+    gearP = new QLabel(this);
     gearP->setGeometry(360, 165, 13, 13);
     gearP->setText("P  ");
-//    gearP->setStyleSheet("QLabel {color: white;}");
+    gearP->setStyleSheet("QLabel {color: white;}");
 
-    QLabel *gearN = new QLabel(this);
+    gearN = new QLabel(this);
     gearN->setGeometry(373, 165, 200, 13);
     gearN->setText("N  ");
 
-    QLabel *gearR = new QLabel(this);
+    gearR = new QLabel(this);
     gearR->setGeometry(390, 165, 200, 13);
     gearR->setText("R  ");
 
-    QLabel *gearD = new QLabel(this);
+    gearD = new QLabel(this);
     gearD->setGeometry(403, 165, 200, 13);
     gearD->setText("D  ");
 
-
-    if(gear == 0){
-        gearP->setStyleSheet("QLabel {color: white;}");
-        gearN->setStyleSheet("QLabel {color: black;}");
-        gearR->setStyleSheet("QLabel {color: black;}");
-        gearD->setStyleSheet("QLabel {color: black;}");
-    }
-    else if(gear ==1){
-        gearP->setStyleSheet("QLabel {color: black;}");
-        gearN->setStyleSheet("QLabel {color: white;}");
-        gearR->setStyleSheet("QLabel {color: black;}");
-        gearD->setStyleSheet("QLabel {color: black;}");
-    }
-    else if(gear ==2){
-        gearP->setStyleSheet("QLabel {color: black;}");
-        gearN->setStyleSheet("QLabel {color: black;}");
-        gearR->setStyleSheet("QLabel {color: white;}");
-        gearD->setStyleSheet("QLabel {color: black;}");
-    }
-    else if(gear ==3){
-        gearP->setStyleSheet("QLabel {color: black;}");
-        gearN->setStyleSheet("QLabel {color: black;}");
-        gearR->setStyleSheet("QLabel {color: black;}");
-        gearD->setStyleSheet("QLabel {color: white;}");}
-    else{}
 
 
     //소켓 및 통신 설정, 서버에 메시지 전송
@@ -102,6 +81,7 @@ speed::speed(QWidget *parent) : QWidget(parent)
     socket->connectToHost("192.168.100.38", 7777);
     QString SendStr = QString("cluster");
     socket->write(SendStr.toUtf8(), SendStr.length()+1);
+    musicIndex = 0;
     connect(socket, SIGNAL(readyRead()), this, SLOT(getData()));
 
 
@@ -117,49 +97,32 @@ speed::speed(QWidget *parent) : QWidget(parent)
     title->setStyleSheet("QLabel {color: white;}");
     title->setText("Title: ");
 
-
-    QMap<int, QString> songList;
     //저장 형태: 제목, 가수
     songList[0] = "DNA";
     songList[1] = "12";
     songList[3] = "Engine";
-    //    player = new QMediaPlayer;
-    QMap<int, QString> artistList;
+
     //저장 형태: 제목, 가수
     artistList[0] = "BTS";
     artistList[1] = "_0";
     artistList[3] = "_1";
 
     //실제 읽어오는 노래
-    QLabel *song_singer = new QLabel(this);
+    song_singer = new QLabel(this);
     song_singer->setGeometry(390, 230, 100, 20);
-    song_singer->setStyleSheet("QLabel {color: white;}");
-//    song_singer->setText("ss");
-    //만약ECU에서 오는 값이 4 0이면 이전 곡
-    //4 1이면 다음 곡
-    //4 2면 PLAY
-    //    player->setMedia(QUrl::fromLocalFile("./mp3/ICY.mp3"));
 
 
-    QLabel *song_title = new QLabel(this);
+
+    song_title = new QLabel(this);
     song_title->setGeometry(390, 250, 100, 20);
     song_title->setStyleSheet("QLabel {color: white;}");
-//    song_title->setText("dd");
-
-    //    player = new QMediaPlayer;
-//    player->setMedia(QUrl::fromLocalFile("./mp3/ICY.mp3"));
-//    player->setVolume(50);
-//    player->play();
-//    player->stop();
-
 
      player = new QMediaPlayer(this);
      playerList= new QMediaPlaylist();
-     //playerList->addMedia(QUrl::fromLocalFile(QFileInfo())));
+
      playerList->addMedia(QUrl::fromLocalFile(QFileInfo("C:/Users/MOBIS/Desktop/DNA.mp3").absoluteFilePath()));
      playerList->addMedia(QUrl::fromLocalFile(QFileInfo("C:/Users/MOBIS/Desktop/12.mp3").absoluteFilePath()));
      playerList->addMedia(QUrl::fromLocalFile(QFileInfo("C:/Users/MOBIS/Desktop/start_engine_1.wav").absoluteFilePath()));
-     //"C:\\prj/1908_IT_Team2/Cluster/mp3/Stone_Of_Zion.mp3"
 
 
 
@@ -169,44 +132,8 @@ speed::speed(QWidget *parent) : QWidget(parent)
      player->setPlaybackRate(1);
      player->setVideoOutput(playerVideo);
 
-     playerList->setCurrentIndex(0);
+     playerList->setCurrentIndex(musicIndex);
      player->setPlaylist(playerList);
-
-     int musicIndex = 0;
-
-     if(music == 0){
-         player->stop();
-     }
-
-     //play
-     else if(music ==1){
-         playerList->setCurrentIndex(musicIndex);
-
-         song_title->setText(songList[musicIndex]);
-         song_singer->setText(artistList[musicIndex]);
-
-         qDebug() << QFileInfo("C:/Users/MOBIS/Desktop/DNA.mp3").fileName();
-         player->setVolume(100);
-         player->play();
-     }
-     //next
-     else if (music ==2){
-         musicIndex++;
-         song_title->setText(songList[musicIndex]);
-         song_singer->setText(artistList[musicIndex]);
-         playerList->setCurrentIndex(musicIndex);
-         player->play();
-     }
-//     prev
-     else if(music ==3){
-         musicIndex--;
-         song_title->setText(songList[musicIndex]);
-         song_singer->setText(artistList[musicIndex]);
-         playerList->setCurrentIndex(musicIndex);
-         player->play();
-     }
-     else{}
-
 
 
 
@@ -215,10 +142,7 @@ speed::speed(QWidget *parent) : QWidget(parent)
 
 
 void speed::displayClock(){
-    //
 
-//    label->setText(QString("%1 %2").arg(QDate::currentDate().toString()).arg(QTime::currentTime().toString()));
-////    label->setText(QTime::currentTime().toString());
     lcd->display(QString("%1").arg(QTime::currentTime().toString()));
 
 }
@@ -287,14 +211,7 @@ void speed::paintEvent(QPaintEvent *event){
 
     //-----------------------------------------------------
     //LCD 패널
-    //음악 재생, 주행거리, 지도, 낧씨, 연료량 표시
-//    painter.drawRect(20, 20, 160, 160, 50, 80);
-    //음악 재생기 UI
-    //시작 위치 초기화
 
-//    painter.translate(-((width()/6)*3 + 90), -(height()/2 + 9));
-//    painter.rotate(-(6.0 * time.second() + time.msec()*0.006));
-    //    painter.translate(0, 0);
     //방향지시등
     painter.restore();
     painter.save();
@@ -325,13 +242,6 @@ void speed::paintEvent(QPaintEvent *event){
     else{}
 
 
-    //    painter.setPen(Qt::white);
-
-
-    //-----------------------------------------------------
-    //방향지시등
-
-    //왼쪽 오른쪽 화살표
 
 
 }
@@ -354,13 +264,7 @@ void speed::click(int id){
     qDebug() << id;
     QString SendStr;
     switch(id){
-
-//        case 61:
-//            socket->connectToHost("192.168.100.49", 7777);
-//            SendStr = QString("cluster");
-//            socket->write(SendStr.toUtf8(), SendStr.length()+1);
-//            break;
-    }
+}
 
 
 }
@@ -370,14 +274,15 @@ void speed::getData(){
 
     QTcpSocket *ecu = (QTcpSocket*)sender();
     QPainter painter(this);
+//    musicIndex = 0;
 
     while(ecu->canReadLine())
     {
 
         QString line = QString::fromUtf8(ecu->readLine()).trimmed();
 
-
         QStringList msgs = line.split(" ");
+
         //0 속도
         if(msgs[0].toInt() == 0){
             speed_ECU = msgs[1].toInt();
@@ -408,42 +313,73 @@ void speed::getData(){
         //4 기어
         else if(msgs[0].toInt() == 4){
             gear = msgs[1].toInt();
+            if(gear == 0){
+                gearP->setStyleSheet("QLabel {color: white;}");
+                gearN->setStyleSheet("QLabel {color: black;}");
+                gearR->setStyleSheet("QLabel {color: black;}");
+                gearD->setStyleSheet("QLabel {color: black;}");
+            }
+            else if(gear ==1){
+                gearP->setStyleSheet("QLabel {color: black;}");
+                gearN->setStyleSheet("QLabel {color: white;}");
+                gearR->setStyleSheet("QLabel {color: black;}");
+                gearD->setStyleSheet("QLabel {color: black;}");
+            }
+            else if(gear ==2){
+                gearP->setStyleSheet("QLabel {color: black;}");
+                gearN->setStyleSheet("QLabel {color: black;}");
+                gearR->setStyleSheet("QLabel {color: white;}");
+                gearD->setStyleSheet("QLabel {color: black;}");
+            }
+            else if(gear ==3){
+                gearP->setStyleSheet("QLabel {color: black;}");
+                gearN->setStyleSheet("QLabel {color: black;}");
+                gearR->setStyleSheet("QLabel {color: black;}");
+                gearD->setStyleSheet("QLabel {color: white;}");}
+            else{}
+
 
 
         }
         //5 깜박이
         else if(msgs[0].toInt() == 5){
             light = msgs[1].toInt();
-//            if(light == 0){
-
-//            }
-//            else if(light ==1 ){
-
-//                painter.restore();
-//                painter.save();
-//                painter.drawPixmap(200, 120, lArrow);
-//            }
-//            else if(light ==2 ){
-//                painter.restore();
-//                painter.save();
-//                painter.drawPixmap(400, 110, rArrow);
-//            }
-//            else if(light ==3 ){
-//                painter.restore();
-//                painter.save();
-//                painter.drawPixmap(400, 110, rArrow);
-//                painter.restore();
-//                painter.save();
-//                painter.drawPixmap(200, 120, lArrow);
-
-//            }
-//            else{}
-
         }
         //6 음악
         else if(msgs[0].toInt() == 6){
             music = msgs[1].toInt();
+            if(music == 0){
+                player->stop();
+            }
 
+            //play
+            else if(music ==1){
+                playerList->setCurrentIndex(musicIndex);
+
+                song_title->setText(songList[musicIndex]);
+                song_singer->setText(artistList[musicIndex]);
+
+                qDebug() << QFileInfo("C:/Users/MOBIS/Desktop/DNA.mp3").fileName();
+                player->setVolume(100);
+                player->play();
+            }
+            //next
+            else if (music ==2){
+                musicIndex++;
+                song_title->setText(songList[musicIndex]);
+                song_singer->setText(artistList[musicIndex]);
+                playerList->setCurrentIndex(musicIndex);
+                player->play();
+            }
+       //     prev
+            else if(music ==3){
+                musicIndex--;
+                song_title->setText(songList[musicIndex]);
+                song_singer->setText(artistList[musicIndex]);
+                playerList->setCurrentIndex(musicIndex);
+                player->play();
+            }
+            else{}
 
         }
         else {

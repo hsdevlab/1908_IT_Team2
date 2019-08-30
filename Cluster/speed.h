@@ -25,7 +25,19 @@ public:
     QLCDNumber *lcd;
     QLabel *fuelLabel;
     QLabel *disLabel;
+
+    QLabel *gearP;
+    QLabel *gearN;
+    QLabel *gearR;
+    QLabel *gearD;
+
+    QMap<int, QString> songList;
+    QMap<int, QString> artistList;
+    QLabel *song_singer;
+    QLabel *song_title;
+
     int musicFlag;
+    int musicIndex;
 //    QPainter painter(speed);
     int speed_ECU;
     int distance;
