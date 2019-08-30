@@ -36,10 +36,11 @@ int wink_state 	 = 0; // 0: None, 1: Left, 2: right, 3: Warning
 int current_speed = 0;
 int current_fuel;
 int current_total_distance;
+FILE *fpinfo; // carinfo.txt
 double dist = 0.0;
 int dist_count = 0;
-FILE *fp;
 
+void fileClose();
 int readLine(int fd, char* str);
 int logging(char* str);
 void* thRecver();
@@ -83,7 +84,9 @@ void* naturalDeceleration()
 		printf("current speed : %d\n", current_speed);
 		nonActuator(); // -2km/h per second 
 		if(dist < 1){
-			dist += current_speed / 3600;
+			dist += (double)current_speed / 3600;
+			printf("[DEBUG] current_fuel : %d\n", current_fuel);
+			printf("[DEBUG] dist : %lf ,  current_total_distance : %d\n", dist, current_total_distance);
 		}
 		if(dist >= 1){
 			increaseDistance();
@@ -202,6 +205,10 @@ void* thSender()
 	}
 }
 
+void fileClose(){
+	fclose(fpinfo);
+	exit(1);
+}
 
 int main(int argc, char* argv[])
 {
@@ -210,6 +217,7 @@ int main(int argc, char* argv[])
 		exit(0);	
 	}
 	loadFile();
+	signal(SIGINT, fileClose);
 	iListenPort = atoi(argv[1]);
 
 	// Socket 생성
