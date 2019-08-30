@@ -1,8 +1,8 @@
 # Created by https://www.gitignore.io/api/c,qt,qtcreator
 # Edit at https://www.gitignore.io/?templates=c,qt,qtcreator
 
-carinfo.txt
-ECU_log.txt
+ECU/carinfo.txt
+ECU/ECU_log.txt
 
 ### C ###
 # Prerequisites
