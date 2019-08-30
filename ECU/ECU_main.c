@@ -90,14 +90,14 @@ void* naturalDeceleration()
 	{
 		memset(tmp_msg, 0x00, sizeof(tmp_msg));
 		memset(tmp_msg2, 0x00, sizeof(tmp_msg2));
-		printf("current speed : %d\n", current_speed);
-		printf("RPM : %d\n", RPM);
+		printf("[Speed] %d\n", current_speed);
+		printf("[RPM] %d\n", RPM);
 		nonActuator(); // -2km/h per second 
 		if(dist < 1)
 		{
 			dist += (double)current_speed / 3600;
-			printf("[DEBUG] current_fuel : %d\n", current_fuel);
-			printf("[DEBUG] dist : %lf ,  current_total_distance : %d\n", dist, current_total_distance);
+			printf("[Fuel] %d\n", current_fuel);
+			printf("[Distance] %d\n", current_total_distance);
 		}
 		if(dist >= 1){
 			increaseDistance();
@@ -124,7 +124,7 @@ void* thRecver(void *arg)
 {
 	char recv_msg[MAXLINE], send_msg[MAXLINE];
 	int thr_arg = *((int *)arg);
-	fprintf(stderr, "t_recver\n");
+	//fprintf(stderr, "t_recver\n");
 	while(1)
 	{
 		if(fdSock[thr_arg] == NULL)
@@ -134,7 +134,7 @@ void* thRecver(void *arg)
 		memset(recv_msg, 0x00, sizeof(recv_msg));
 		memset(send_msg, 0x00, sizeof(send_msg));
 		int iLen = readLine(fdSock[thr_arg], recv_msg);
-		fprintf(stderr, "rcv");
+		//fprintf(stderr, "rcv");
 		sprintf(sLogging, "recv : %s\n", recv_msg); 		
 		logging(sLogging);
 
@@ -146,18 +146,14 @@ void* thRecver(void *arg)
 			if(command == 0){
 				accel_val = content;
 				accelActuator();
-				printf("[Accel]----Current speed : %d----------\n", current_speed);
-				printf("[Accel]----Current gear  : %d----------\n", gear_state);
 			}else if(command == 1){
 				break_val = content;
 				breakActuator();
-				printf("[Break]----Current speed : %d----------\n", current_speed);
-				printf("[Break]----Current gear  : %d----------\n", gear_state);
 			}else if(command == 2){
 				gear_state = content;
 				sprintf(send_msg,"4 %d", gear_state);
 				AddQueue(send_msg, 0);
-				printf("[Gear]-----Gear state changed: %d------\n", gear_state);
+				printf("[Gear] %d\n", gear_state);
 			}else if(command == 3){
 				wink_state = content;
 				sprintf(send_msg,"5 %d", wink_state);
