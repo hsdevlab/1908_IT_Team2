@@ -5,6 +5,7 @@
 #### Member : Shin Heesoo, Eom Hyeonggeun, Lee Gwangmin
 ---
 **1. Content**
+
 Simple cluster project to practice Qt and Linux system programming.
 
 **2. Usage**
