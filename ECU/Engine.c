@@ -8,10 +8,10 @@ extern int RPM;
 
 void accelActuator()
 {
-	RPM = RPM+1100;
-	if(RPM>8000)
+	RPM = RPM+20;
+	if(RPM>240)
 	{
-		RPM = 8000;
+		RPM = 240;
 	}
 
 	switch(gear_state)
@@ -22,17 +22,18 @@ void accelActuator()
 			break;
 		case 2:
 		case 3:
-			if(current_speed + (accel_val*10) > MAX_SPEED)
+
+			if(current_speed + (accel_val) > MAX_SPEED)
 				current_speed = MAX_SPEED;
 			else
-				current_speed += 10 * accel_val; 
+				current_speed += accel_val; 
 			break;
 	}
 }
 
 void breakActuator()
 {
-	RPM = RPM-1500;
+	RPM = RPM-30;
 	if(RPM<0)
 	{
 		RPM = 0;
@@ -45,17 +46,17 @@ void breakActuator()
 			break;
 		case 2:
 		case 3:
-			if(current_speed - (20*break_val) < 0)
+			if(current_speed - (2*break_val) < 0)
 				current_speed = 0;
 			else
-				current_speed -= 20 * break_val; 
+				current_speed -= 2 * break_val; 
 			break;
 	}
 }
 
 void nonActuator()
 {
-	RPM = RPM-200;
+	RPM = RPM-10;
 	if(RPM<0)
 	{
 		RPM = 0;
