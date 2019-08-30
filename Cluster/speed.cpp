@@ -1,6 +1,8 @@
 #include <QtWidgets>
 #include "speed.h"
 #include <QString>
+#include <QFileInfo>
+#include <QUrl>
 
 speed::speed(QWidget *parent) : QWidget(parent)
 {
@@ -16,6 +18,14 @@ speed::speed(QWidget *parent) : QWidget(parent)
         qDebug() << "unable to load img";
         exit(-1);
     }
+    if(!lArrow.load(":/lArrow.PNG")){
+        qDebug() << "unable to load img";
+        exit(-1);
+    }
+    if(!rArrow.load(":/rArrow.PNG")){
+        qDebug() << "unable to load img";
+        exit(-1);
+    }
 
     //시계
     lcd = new QLCDNumber(8, this);
@@ -25,39 +35,39 @@ speed::speed(QWidget *parent) : QWidget(parent)
     timer->start(1000);
 
     //연료량
-    QLabel *fuelLabel = new QLabel(this);
+    fuelLabel = new QLabel(this);
     fuelLabel->setGeometry(300, 325, 200, 13);
     fuelLabel->setStyleSheet("QLabel {color: white;}");
     //QString("%1").arg(fuel);
 //    fuelLabel->setText("hi");
-    fuelLabel->setText(QString("%1").arg(fuel));
+//    fuelLabel->setText(QString("%1").arg(fuel));
 
     //주행거리
 
-    QLabel *disLabel = new QLabel(this);
+    disLabel = new QLabel(this);
     disLabel->setGeometry(420, 325, 200, 13);
     disLabel->setStyleSheet("QLabel {color: white;}");
     //QString("%1").arg(fuel);
 //    fuelLabel->setText("hi");
-    disLabel->setText(QString("%1").arg(distance));
+//    disLabel->setText(QString("%1").arg(distance));
 
     //기어
 
     QLabel *gearP = new QLabel(this);
-    gearP->setGeometry(350, 170, 13, 13);
+    gearP->setGeometry(360, 165, 13, 13);
     gearP->setText("P  ");
 //    gearP->setStyleSheet("QLabel {color: white;}");
 
     QLabel *gearN = new QLabel(this);
-    gearN->setGeometry(363, 170, 200, 13);
+    gearN->setGeometry(373, 165, 200, 13);
     gearN->setText("N  ");
 
     QLabel *gearR = new QLabel(this);
-    gearR->setGeometry(380, 170, 200, 13);
+    gearR->setGeometry(390, 165, 200, 13);
     gearR->setText("R  ");
 
     QLabel *gearD = new QLabel(this);
-    gearD->setGeometry(393, 170, 200, 13);
+    gearD->setGeometry(403, 165, 200, 13);
     gearD->setText("D  ");
 
 
@@ -110,10 +120,15 @@ speed::speed(QWidget *parent) : QWidget(parent)
 
     QMap<int, QString> songList;
     //저장 형태: 제목, 가수
-    songList[0] = "ICY ITZY";
-    songList[1] = "Stone of Zion Naul";
-
+    songList[0] = "DNA";
+    songList[1] = "12";
+    songList[3] = "Engine";
     //    player = new QMediaPlayer;
+    QMap<int, QString> artistList;
+    //저장 형태: 제목, 가수
+    artistList[0] = "BTS";
+    artistList[1] = "_0";
+    artistList[3] = "_1";
 
     //실제 읽어오는 노래
     QLabel *song_singer = new QLabel(this);
@@ -136,6 +151,62 @@ speed::speed(QWidget *parent) : QWidget(parent)
 //    player->setVolume(50);
 //    player->play();
 //    player->stop();
+
+
+     player = new QMediaPlayer(this);
+     playerList= new QMediaPlaylist();
+     //playerList->addMedia(QUrl::fromLocalFile(QFileInfo())));
+     playerList->addMedia(QUrl::fromLocalFile(QFileInfo("C:/Users/MOBIS/Desktop/DNA.mp3").absoluteFilePath()));
+     playerList->addMedia(QUrl::fromLocalFile(QFileInfo("C:/Users/MOBIS/Desktop/12.mp3").absoluteFilePath()));
+     playerList->addMedia(QUrl::fromLocalFile(QFileInfo("C:/Users/MOBIS/Desktop/start_engine_1.wav").absoluteFilePath()));
+     //"C:\\prj/1908_IT_Team2/Cluster/mp3/Stone_Of_Zion.mp3"
+
+
+
+     playerVideo = new QVideoWidget(this);
+
+     player->setVolume(50);
+     player->setPlaybackRate(1);
+     player->setVideoOutput(playerVideo);
+
+     playerList->setCurrentIndex(0);
+     player->setPlaylist(playerList);
+
+     int musicIndex = 0;
+
+     if(music == 0){
+         player->stop();
+     }
+
+     //play
+     else if(music ==1){
+         playerList->setCurrentIndex(musicIndex);
+
+         song_title->setText(songList[musicIndex]);
+         song_singer->setText(artistList[musicIndex]);
+
+         qDebug() << QFileInfo("C:/Users/MOBIS/Desktop/DNA.mp3").fileName();
+         player->setVolume(100);
+         player->play();
+     }
+     //next
+     else if (music ==2){
+         musicIndex++;
+         song_title->setText(songList[musicIndex]);
+         song_singer->setText(artistList[musicIndex]);
+         playerList->setCurrentIndex(musicIndex);
+         player->play();
+     }
+//     prev
+     else if(music ==3){
+         musicIndex--;
+         song_title->setText(songList[musicIndex]);
+         song_singer->setText(artistList[musicIndex]);
+         playerList->setCurrentIndex(musicIndex);
+         player->play();
+     }
+     else{}
+
 
 
 
@@ -224,8 +295,37 @@ void speed::paintEvent(QPaintEvent *event){
 //    painter.translate(-((width()/6)*3 + 90), -(height()/2 + 9));
 //    painter.rotate(-(6.0 * time.second() + time.msec()*0.006));
     //    painter.translate(0, 0);
+    //방향지시등
     painter.restore();
-//    painter.setPen(Qt::white);
+    painter.save();
+//    light = 3;
+    if(light == 0){
+
+    }
+    else if(light ==1 ){
+
+        painter.restore();
+        painter.save();
+        painter.drawPixmap(200, 120, lArrow);
+    }
+    else if(light ==2 ){
+        painter.restore();
+        painter.save();
+        painter.drawPixmap(400, 110, rArrow);
+    }
+    else if(light ==3 ){
+        painter.restore();
+        painter.save();
+        painter.drawPixmap(400, 110, rArrow);
+        painter.restore();
+        painter.save();
+        painter.drawPixmap(200, 120, lArrow);
+
+    }
+    else{}
+
+
+    //    painter.setPen(Qt::white);
 
 
     //-----------------------------------------------------
@@ -269,7 +369,7 @@ void speed::click(int id){
 void speed::getData(){
 
     QTcpSocket *ecu = (QTcpSocket*)sender();
-
+    QPainter painter(this);
 
     while(ecu->canReadLine())
     {
@@ -285,12 +385,15 @@ void speed::getData(){
         //1 주행거리
         else if(msgs[0].toInt() == 1){
             distance = msgs[1].toInt();
+            disLabel->setText(QString("%1").arg(distance));
+
             qDebug() <<"dis" << distance << "\n";
 
         }
         //2 연료량
         else if(msgs[0].toInt() == 2){
             fuel = msgs[1].toInt();
+            fuelLabel->setText(QString("%1").arg(fuel));
             qDebug() <<"fu" << fuel << "\n";
 
 
@@ -311,7 +414,30 @@ void speed::getData(){
         //5 깜박이
         else if(msgs[0].toInt() == 5){
             light = msgs[1].toInt();
+//            if(light == 0){
 
+//            }
+//            else if(light ==1 ){
+
+//                painter.restore();
+//                painter.save();
+//                painter.drawPixmap(200, 120, lArrow);
+//            }
+//            else if(light ==2 ){
+//                painter.restore();
+//                painter.save();
+//                painter.drawPixmap(400, 110, rArrow);
+//            }
+//            else if(light ==3 ){
+//                painter.restore();
+//                painter.save();
+//                painter.drawPixmap(400, 110, rArrow);
+//                painter.restore();
+//                painter.save();
+//                painter.drawPixmap(200, 120, lArrow);
+
+//            }
+//            else{}
 
         }
         //6 음악

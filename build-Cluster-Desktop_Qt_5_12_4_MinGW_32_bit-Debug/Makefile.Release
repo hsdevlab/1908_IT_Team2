@@ -109,14 +109,22 @@ compiler_rcc_clean:
 	-$(DEL_FILE) release\qrc_resources.cpp release\qrc_resources.cpp
 release/qrc_resources.cpp: ../Cluster/resources.qrc \
 		D:/QT/5.12.4/mingw73_32/bin/rcc.exe \
+		../Cluster/lArrow.PNG \
+		../Cluster/cluster.PNG \
+		../Cluster/rArrow.PNG \
 		../Cluster/cluster_1.PNG \
-		../Cluster/Blank_cd.png
+		../Cluster/Blank_cd.png \
+		../Cluster/cluster_cd.PNG
 	D:\QT\5.12.4\mingw73_32\bin\rcc.exe -name resources ..\Cluster\resources.qrc -o release\qrc_resources.cpp
 
 release/qrc_resources.cpp: ../Cluster/resources.qrc \
 		D:/QT/5.12.4/mingw73_32/bin/rcc.exe \
+		../Cluster/lArrow.PNG \
+		../Cluster/cluster.PNG \
+		../Cluster/rArrow.PNG \
 		../Cluster/cluster_1.PNG \
-		../Cluster/Blank_cd.png
+		../Cluster/Blank_cd.png \
+		../Cluster/cluster_cd.PNG
 	D:\QT\5.12.4\mingw73_32\bin\rcc.exe -name resources ..\Cluster\resources.qrc -o release\qrc_resources.cpp
 
 compiler_moc_predefs_make_all: release/moc_predefs.h
@@ -381,6 +389,9 @@ release/moc_speed.cpp: ../Cluster/speed.h \
 		D:/QT/5.12.4/mingw73_32/include/QtCore/qmetaobject.h \
 		D:/QT/5.12.4/mingw73_32/include/QtMultimedia/qaudio.h \
 		D:/QT/5.12.4/mingw73_32/include/QtNetwork/qnetworkconfiguration.h \
+		D:/QT/5.12.4/mingw73_32/include/QtWidgets/QLCDNumber \
+		D:/QT/5.12.4/mingw73_32/include/QtWidgets/qlcdnumber.h \
+		D:/QT/5.12.4/mingw73_32/include/QtWidgets/qframe.h \
 		release/moc_predefs.h \
 		D:/QT/5.12.4/mingw73_32/bin/moc.exe
 	D:\QT\5.12.4\mingw73_32\bin\moc.exe $(DEFINES) --include C:/prj/1908_IT_Team2/build-Cluster-Desktop_Qt_5_12_4_MinGW_32_bit-Debug/release/moc_predefs.h -ID:/QT/5.12.4/mingw73_32/mkspecs/win32-g++ -IC:/prj/1908_IT_Team2/Cluster -ID:/QT/5.12.4/mingw73_32/include -ID:/QT/5.12.4/mingw73_32/include/QtMultimediaWidgets -ID:/QT/5.12.4/mingw73_32/include/QtMultimedia -ID:/QT/5.12.4/mingw73_32/include/QtWidgets -ID:/QT/5.12.4/mingw73_32/include/QtGui -ID:/QT/5.12.4/mingw73_32/include/QtANGLE -ID:/QT/5.12.4/mingw73_32/include/QtNetwork -ID:/QT/5.12.4/mingw73_32/include/QtCore -I. -ID:/QT/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include/c++ -ID:/QT/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include/c++/i686-w64-mingw32 -ID:/QT/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include/c++/backward -ID:/QT/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include -ID:/QT/Tools/mingw730_32/lib/gcc/i686-w64-mingw32/7.3.0/include-fixed -ID:/QT/Tools/mingw730_32/i686-w64-mingw32/include ..\Cluster\speed.h -o release\moc_speed.cpp
@@ -665,7 +676,10 @@ release/main.o: ../Cluster/main.cpp D:/QT/5.12.4/mingw73_32/include/QtWidgets/QA
 		D:/QT/5.12.4/mingw73_32/include/QtMultimedia/qmediaenumdebug.h \
 		D:/QT/5.12.4/mingw73_32/include/QtCore/qmetaobject.h \
 		D:/QT/5.12.4/mingw73_32/include/QtMultimedia/qaudio.h \
-		D:/QT/5.12.4/mingw73_32/include/QtNetwork/qnetworkconfiguration.h
+		D:/QT/5.12.4/mingw73_32/include/QtNetwork/qnetworkconfiguration.h \
+		D:/QT/5.12.4/mingw73_32/include/QtWidgets/QLCDNumber \
+		D:/QT/5.12.4/mingw73_32/include/QtWidgets/qlcdnumber.h \
+		D:/QT/5.12.4/mingw73_32/include/QtWidgets/qframe.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\main.o ..\Cluster\main.cpp
 
 release/speed.o: ../Cluster/speed.cpp D:/QT/5.12.4/mingw73_32/include/QtWidgets/QtWidgets \
@@ -1151,7 +1165,8 @@ release/speed.o: ../Cluster/speed.cpp D:/QT/5.12.4/mingw73_32/include/QtWidgets/
 		D:/QT/5.12.4/mingw73_32/include/QtCore/QUrl \
 		D:/QT/5.12.4/mingw73_32/include/QtMultimedia/qmediaenumdebug.h \
 		D:/QT/5.12.4/mingw73_32/include/QtMultimedia/qaudio.h \
-		D:/QT/5.12.4/mingw73_32/include/QtNetwork/qnetworkconfiguration.h
+		D:/QT/5.12.4/mingw73_32/include/QtNetwork/qnetworkconfiguration.h \
+		D:/QT/5.12.4/mingw73_32/include/QtWidgets/QLCDNumber
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\speed.o ..\Cluster\speed.cpp
 
 release/qrc_resources.o: release/qrc_resources.cpp 

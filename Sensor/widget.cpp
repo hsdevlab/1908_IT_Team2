@@ -113,13 +113,16 @@ Widget::Widget(QWidget *parent)
     QButtonGroup *musicGroup = new QButtonGroup(this);
     QPushButton *musicL = new QPushButton("◀", this);
     QPushButton *musicR = new QPushButton("▶", this);
+    QPushButton *musicStop = new QPushButton("Stop", this);
     QPushButton *musicPlay = new QPushButton("Play", this);
     musicL->setGeometry(130, 170 , 40, 40);
     musicR->setGeometry(330, 170 , 40, 40);
-    musicPlay->setGeometry(230, 170 , 40, 40);
+    musicPlay->setGeometry(230, 150 , 40, 40);
+    musicStop->setGeometry(230, 190 , 40, 40);
     musicGroup->addButton(musicL, 51);
     musicGroup->addButton(musicR, 52);
     musicGroup->addButton(musicPlay, 53);
+    musicGroup->addButton(musicStop, 54);
     connect(musicGroup, SIGNAL(buttonClicked(int)), SLOT(click(int)));
 
 
@@ -159,7 +162,6 @@ void Widget::readyRead()
         qDebug() << line << "\n";
     }
 }
-
 
 
 void Widget::click(int id)
@@ -248,17 +250,23 @@ void Widget::click(int id)
 
         //51-53 음악
         case 51:
-            SendStr =QString("4 0");
+
+            SendStr =QString("4 3");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
         case 52:
-            SendStr =QString("4 1");
-            socket->write(SendStr.toUtf8(), SendStr.length() + 1);
-            break;
-       case 53:
             SendStr =QString("4 2");
             socket->write(SendStr.toUtf8(), SendStr.length() + 1);
             break;
+       case 53:
+            SendStr =QString("4 1");
+            socket->write(SendStr.toUtf8(), SendStr.length() + 1);
+            break;
+       case 54:
+            SendStr =QString("4 0");
+            socket->write(SendStr.toUtf8(), SendStr.length() + 1);
+            break;
+
 
        //통신 시작 버튼
         case 61:

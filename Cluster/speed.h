@@ -5,6 +5,10 @@
 #include <QtNetwork/QTcpSocket>
 #include <QMediaPlayer>
 #include <QLCDNumber>
+#include <QLabel>
+#include <QMediaPlaylist>
+#include <QVideoWidget>
+
 class speed : public QWidget
 {
     Q_OBJECT
@@ -13,8 +17,16 @@ public:
     explicit speed(QWidget *parent = nullptr);
     QPixmap pixmap;
     QPixmap cd;
+    QPixmap lArrow;
+    QPixmap rArrow;
     QMediaPlayer *player;
+    QMediaPlaylist *playerList;
+    QVideoWidget *playerVideo;
     QLCDNumber *lcd;
+    QLabel *fuelLabel;
+    QLabel *disLabel;
+    int musicFlag;
+//    QPainter painter(speed);
     int speed_ECU;
     int distance;
     int fuel;
