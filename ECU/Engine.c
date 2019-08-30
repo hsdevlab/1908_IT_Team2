@@ -4,6 +4,7 @@ extern int accel_val; // 0, 1, 2, 3
 extern int break_val; // 0, 1, 2, 3
 extern int wink_state; // 0: None, 1: Left, 2: right, 3: Warning
 extern int current_speed;
+extern int RPM;
 
 void accelActuator()
 {
