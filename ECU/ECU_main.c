@@ -36,6 +36,7 @@ int wink_state 	 = 0; // 0: None, 1: Left, 2: right, 3: Warning
 int current_speed = 0;
 int current_fuel;
 int current_total_distance;
+int RPM = 0;
 double dist = 0.0;
 int dist_count = 0;
 FILE *fp;
@@ -61,7 +62,7 @@ int readLine(int fd, char* str)
 
 
 int logging(char* str) // 로깅
-{	
+{
 	fprintf(stderr, "logging\n");
 	// 로그 파일 열기
 	if((fp = fopen("ECU_log.txt","a"))==NULL)
@@ -76,11 +77,13 @@ int logging(char* str) // 로깅
 
 void* naturalDeceleration()
 {
-	char tmp_msg[20];
+	char tmp_msg[20], tmp_msg2[20];
 	while(1)
 	{
 		memset(tmp_msg, 0x00, sizeof(tmp_msg));
+		memset(tmp_msg2, 0x00, sizeof(tmp_msg2));
 		printf("current speed : %d\n", current_speed);
+		printf("RPM : %d\n", RPM);
 		nonActuator(); // -2km/h per second 
 		if(dist < 1){
 			dist += current_speed / 3600;
@@ -89,17 +92,19 @@ void* naturalDeceleration()
 			increaseDistance();
 			dist_count++;
 			dist = 0.0;
-			sprintf(tmp_msg,"1 %d\n",current_total_distance);
-			AddQueue(tmp_msg, 1);
+			sprintf(tmp_msg,"1 %d",current_total_distance);
+			AddQueue(tmp_msg, 0);
 		}
 		if(dist_count >= FUEL_IFFICIENCY){
 			decreaseFuel();
 			dist_count = 0;
-			sprintf(tmp_msg,"2 %d\n",current_fuel);			
-			AddQueue(tmp_msg, 1);
+			sprintf(tmp_msg,"2 %d",current_fuel);			
+			AddQueue(tmp_msg, 0);
 		}
-		sprintf(tmp_msg,"0 %d\n",current_speed);
-		AddQueue(tmp_msg, 1);
+		sprintf(tmp_msg,"0 %d",current_speed);
+		AddQueue(tmp_msg, 0);
+		sprintf(tmp_msg2,"3 %d",RPM);
+		AddQueue(tmp_msg2, 0);
 		sleep(1);
 	}
 }
@@ -118,7 +123,6 @@ void* thRecver(void *arg)
 		memset(recv_msg, 0x00, sizeof(recv_msg));
 		memset(send_msg, 0x00, sizeof(send_msg));
 		int iLen = readLine(fdSock[thr_arg], recv_msg);
-		printf("\t recv_msg end: %s \n",recv_msg);
 		fprintf(stderr, "rcv");
 		sprintf(sLogging, "recv : %s\n", recv_msg); 		
 		logging(sLogging);
@@ -140,23 +144,21 @@ void* thRecver(void *arg)
 				printf("[Break]----Current gear  : %d----------\n", gear_state);
 			}else if(command == 2){
 				gear_state = content;
-				sprintf(send_msg,"3 %d\n", gear_state);
-				AddQueue(send_msg, 1);
+				sprintf(send_msg,"4 %d", gear_state);
+				AddQueue(send_msg, 0);
 				printf("[Gear]-----Gear state changed: %d------\n", gear_state);
 			}else if(command == 3){
 				wink_state = content;
-				sprintf(send_msg,"4 %d\n", wink_state);
-				AddQueue(send_msg, 1);
+				sprintf(send_msg,"5 %d", wink_state);
+				AddQueue(send_msg, 0);
 				printf("wink !!!\n");
 			}else if(command == 4){
 				// TODO : Send music change signal.
 			}else if(command == 9){
 
-			}
-
+			}		
 			
-			
-			//sprintf(send_msg,"5 %s",itoa(current_speed)); //Music Control information
+			//sprintf(send_msg,"6 %s",itoa(current_speed)); //Music Control information
 			//AddQueue(send_msg, 1);
 		}
 	}
@@ -188,7 +190,8 @@ void* thSender()
 			}
 			while(iQueCurrentIdx[i] != iQueSavedIdx[i])
 			{
-				iLenSend=write(fdSock[i], sQueue[i][iQueCurrentIdx[i]], strlen(sQueue[i][iQueCurrentIdx[i]])+1);
+				iLenSend=write(fdSock[i], sQueue[i][iQueCurrentIdx[i]], strlen(sQueue[i][iQueCurrentIdx[i]]));
+				//iLenSend=write(fdSock[i], sQueue[i][iQueCurrentIdx[i]], strlen(sQueue[i][iQueCurrentIdx[i]])+1);
 				sprintf(sLogging, "send : %s\n", sQueue[i][iQueCurrentIdx[i]]);
 				fprintf(stderr, "sended\n");
 				logging(sLogging);

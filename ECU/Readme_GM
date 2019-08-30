@@ -6,12 +6,13 @@
 - 현재속도 => 0 xxx (km/h)
 - 주행거리 => 1 xxx (km)
 - 연료량   => 2 xxx (L)
-- 기어     => 3 x   
+- PRM     => 3 xxx
+- 기어     => 4 x   
 	recv : ( 0,1,2,3 ) -> show : ( P, N, R, D )
-- 깜빡이   => 4 x
-	recv : ( 0, 1, 2 ) -> show : ( L, R, Both)
-- 음악     => 5 x
-	recv : ( 0,1,2   ) -> show : ( P/S, N, P )
+- 깜빡이   => 5 x
+	recv : ( 0,1,2,3 ) -> show : ( N, L, R, Both)
+- 음악     => 6 x
+	recv : ( 0,1,2,3 ) -> show : ( P, S, N, P )
 
 
 <ECU -> Engine>
@@ -49,6 +50,6 @@
 - 기어     => 2 x
 	x : ( 0,1,2,3 ) -> ( P, N, R, D )
 - 깜빡이   => 3 x
-	x : ( 0, 1, 2 ) -> ( L, R, Both)
+	x : ( 0,1,2,3 ) -> ( N, L, R, Both)
 - 음악     => 4 x
-	x : ( 0,1,2   ) -> ( P/S, N, P )
+	x : ( 0,1,2,3 ) -> ( P, S, N, P )

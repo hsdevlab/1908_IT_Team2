@@ -2,6 +2,12 @@
 
 void accelActuator()
 {
+	RPM = RPM+1100;
+	if(RPM>8000)
+	{
+		RPM = 8000;
+	}
+
 	switch(gear_state)
 	{
 		case 0:
@@ -20,6 +26,12 @@ void accelActuator()
 
 void breakActuator()
 {
+	RPM = RPM-1500;
+	if(RPM<0)
+	{
+		RPM = 0;
+	}
+
 	switch(gear_state)
 	{
 		case 0:
@@ -37,6 +49,12 @@ void breakActuator()
 
 void nonActuator()
 {
+	RPM = RPM-200;
+	if(RPM<0)
+	{
+		RPM = 0;
+	}
+
 	switch(gear_state)
 	{
 		case 0:
