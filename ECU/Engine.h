@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #define MAX_SPEED 240
+#define MAX_RPM   8
 
 void accelActuator();
 void breakActuator();
