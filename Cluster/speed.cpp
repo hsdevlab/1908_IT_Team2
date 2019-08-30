@@ -1,45 +1,98 @@
 #include <QtWidgets>
 #include "speed.h"
-
+#include <QString>
 
 speed::speed(QWidget *parent) : QWidget(parent)
 {
 
 
-    //임시로 시간 잘 돌아가는지 보기
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
     timer->start(10);
     //전체 윈도우 사이즈 조정
     //755*565 pixel (클러스터 이미지 사이즈)
-    this->setFixedSize(755, 565);
-    if(!pixmap.load(":/cluster_cd.PNG")){
+    this->setFixedSize(756, 563);
+    if(!pixmap.load(":/cluster.PNG")){
         qDebug() << "unable to load img";
         exit(-1);
     }
 
-
-//    QLabel *currentTime = new QLabel("Timer", this);
-//    currentTime->setGeometry(20, 20, 200, 20);
-//    connect(currentTime, SIGNAL(timeout()), SLOT(displayClock()));
-//    timer->start(1000);
-//    resize(90, 40);
-
     //시계
-    QLCDNumber *lcd = new QLCDNumber(8, this);
-    lcd->display(QString("%1").arg(QTime::currentTime().toString()));
+    lcd = new QLCDNumber(8, this);
     lcd->setGeometry(230, 150, 100, 50);
+    lcd->setFrameStyle(0);
+    connect(timer, SIGNAL(timeout()), SLOT(displayClock()));    timer->start(1000);
+    timer->start(1000);
 
-    //속도계 바늘 설정
+    //연료량
+    QLabel *fuelLabel = new QLabel(this);
+    fuelLabel->setGeometry(300, 325, 200, 13);
+    fuelLabel->setStyleSheet("QLabel {color: white;}");
+    //QString("%1").arg(fuel);
+//    fuelLabel->setText("hi");
+    fuelLabel->setText(QString("%1").arg(fuel));
+
+    //주행거리
+
+    QLabel *disLabel = new QLabel(this);
+    disLabel->setGeometry(420, 325, 200, 13);
+    disLabel->setStyleSheet("QLabel {color: white;}");
+    //QString("%1").arg(fuel);
+//    fuelLabel->setText("hi");
+    disLabel->setText(QString("%1").arg(distance));
+
+    //기어
+
+    QLabel *gearP = new QLabel(this);
+    gearP->setGeometry(350, 170, 13, 13);
+    gearP->setText("P  ");
+//    gearP->setStyleSheet("QLabel {color: white;}");
+
+    QLabel *gearN = new QLabel(this);
+    gearN->setGeometry(363, 170, 200, 13);
+    gearN->setText("N  ");
+
+    QLabel *gearR = new QLabel(this);
+    gearR->setGeometry(380, 170, 200, 13);
+    gearR->setText("R  ");
+
+    QLabel *gearD = new QLabel(this);
+    gearD->setGeometry(393, 170, 200, 13);
+    gearD->setText("D  ");
+
+
+    if(gear == 0){
+        gearP->setStyleSheet("QLabel {color: white;}");
+        gearN->setStyleSheet("QLabel {color: black;}");
+        gearR->setStyleSheet("QLabel {color: black;}");
+        gearD->setStyleSheet("QLabel {color: black;}");
+    }
+    else if(gear ==1){
+        gearP->setStyleSheet("QLabel {color: black;}");
+        gearN->setStyleSheet("QLabel {color: white;}");
+        gearR->setStyleSheet("QLabel {color: black;}");
+        gearD->setStyleSheet("QLabel {color: black;}");
+    }
+    else if(gear ==2){
+        gearP->setStyleSheet("QLabel {color: black;}");
+        gearN->setStyleSheet("QLabel {color: black;}");
+        gearR->setStyleSheet("QLabel {color: white;}");
+        gearD->setStyleSheet("QLabel {color: black;}");
+    }
+    else if(gear ==3){
+        gearP->setStyleSheet("QLabel {color: black;}");
+        gearN->setStyleSheet("QLabel {color: black;}");
+        gearR->setStyleSheet("QLabel {color: black;}");
+        gearD->setStyleSheet("QLabel {color: white;}");}
+    else{}
+
 
     //소켓 및 통신 설정, 서버에 메시지 전송
     socket = new QTcpSocket(this);
-    connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
-    socket->connectToHost("192.168.100.49", 7777);
+    socket->connectToHost("192.168.100.38", 7777);
     QString SendStr = QString("cluster");
     socket->write(SendStr.toUtf8(), SendStr.length()+1);
-
-//C는 null로 체크, QT는 개행으로 check
+    connect(socket, SIGNAL(readyRead()), this, SLOT(getData()));
 
 
 
@@ -48,7 +101,6 @@ speed::speed(QWidget *parent) : QWidget(parent)
     label->setGeometry(350, 230, 100, 20);
     label->setStyleSheet("QLabel {color: white;}");
     label->setText("Artist: ");
-
 
     QLabel *title = new QLabel(this);
     title->setGeometry(350, 250, 100, 20);
@@ -91,22 +143,21 @@ speed::speed(QWidget *parent) : QWidget(parent)
 }
 
 
-//void speed::displayClock(){
-//    //
+void speed::displayClock(){
+    //
 
 //    label->setText(QString("%1 %2").arg(QDate::currentDate().toString()).arg(QTime::currentTime().toString()));
 ////    label->setText(QTime::currentTime().toString());
+    lcd->display(QString("%1").arg(QTime::currentTime().toString()));
 
-//}
+}
 
 
 void speed::paintEvent(QPaintEvent *event){
     //현재 시간
     QTime time = QTime::currentTime();
-
     QPainter painter(this);
     painter.drawPixmap(0, 0, pixmap);
-
     painter.save();
 
     //속도계 바늘 설정
@@ -127,23 +178,9 @@ void speed::paintEvent(QPaintEvent *event){
     painter.setPen(Qt::NoPen);
     painter.setBrush(speedNeedleColor);
 
-//    painter.save();
-    //rotate 내부 함수에서 돌아가는 부분 설정
-
     painter.rotate(-120);
-    //각 270도가 되면 올라가지 않게.
-    //속도 계산하는 로직 짜는데... 얘를 천천히 올라가도록 해야하고.....
-    //-120도에서 120도 사이에서 왔다갔다 해야함.
-
-//    int speed;
-//    for(speed = -120; speed<120; speed++){
-//        painter.rotate(speed);
-
-
-//    }
-    painter.rotate(6.0 * time.second() + time.msec()*0.006);
-
-//    painter.brushOrigin()
+    painter.rotate(speed_ECU);
+//    painter.rotate(6.0 * time.second() + time.msec()*0.006);
 
     painter.drawConvexPolygon(speedNeedle, 3);
 
@@ -170,7 +207,9 @@ void speed::paintEvent(QPaintEvent *event){
 
     painter.rotate(-120);
     //속도 설정해주는 애랑 LCD 패널 안에 로직 구현하는 애만 클래스 따로 설계해서 넣어 줄 것...?
-    painter.rotate(6.0 * time.second() + time.msec()*0.006);
+    painter.rotate(RPM);
+
+    //    painter.rotate(6.0 * time.second() + time.msec()*0.006);
     painter.drawConvexPolygon(rpmNeedle, 3);
 //    painter.restore();
 
@@ -221,6 +260,69 @@ void speed::click(int id){
 //            SendStr = QString("cluster");
 //            socket->write(SendStr.toUtf8(), SendStr.length()+1);
 //            break;
+    }
+
+
+}
+
+
+void speed::getData(){
+
+    QTcpSocket *ecu = (QTcpSocket*)sender();
+
+
+    while(ecu->canReadLine())
+    {
+
+        QString line = QString::fromUtf8(ecu->readLine()).trimmed();
+
+
+        QStringList msgs = line.split(" ");
+        //0 속도
+        if(msgs[0].toInt() == 0){
+            speed_ECU = msgs[1].toInt();
+        }
+        //1 주행거리
+        else if(msgs[0].toInt() == 1){
+            distance = msgs[1].toInt();
+            qDebug() <<"dis" << distance << "\n";
+
+        }
+        //2 연료량
+        else if(msgs[0].toInt() == 2){
+            fuel = msgs[1].toInt();
+            qDebug() <<"fu" << fuel << "\n";
+
+
+        }
+        //3 RPM
+        else if(msgs[0].toInt() == 3){
+            RPM = msgs[1].toInt();
+            qDebug() <<"rpm" <<RPM << "\n";
+
+
+        }
+        //4 기어
+        else if(msgs[0].toInt() == 4){
+            gear = msgs[1].toInt();
+
+
+        }
+        //5 깜박이
+        else if(msgs[0].toInt() == 5){
+            light = msgs[1].toInt();
+
+
+        }
+        //6 음악
+        else if(msgs[0].toInt() == 6){
+            music = msgs[1].toInt();
+
+
+        }
+        else {
+
+        }
     }
 
 

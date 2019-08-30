@@ -49,6 +49,14 @@ Widget::Widget(QWidget *parent)
     QPushButton *break1 = new QPushButton("1", this);
     QPushButton *break2 = new QPushButton("2", this);
     QPushButton *break3 = new QPushButton("3", this);
+    break0->setAutoRepeat(true);
+    break0->setAutoRepeatDelay(1000);
+    break1->setAutoRepeat(true);
+    break1->setAutoRepeatDelay(1000);
+    break2->setAutoRepeat(true);
+    break2->setAutoRepeatDelay(1000);
+    break3->setAutoRepeat(true);
+    break3->setAutoRepeatDelay(1000);
     break0->setGeometry(200, 550 , 40, 40);
     break1->setGeometry(240, 550 , 40, 40);
     break2->setGeometry(280, 550 , 40, 40);
@@ -69,10 +77,20 @@ Widget::Widget(QWidget *parent)
     acc1->setGeometry(520, 590 , 40, 40);
     acc2->setGeometry(520, 630 , 40, 40);
     acc3->setGeometry(520, 670 , 40, 40);
+    acc0->setAutoRepeat(true);
+    acc0->setAutoRepeatDelay(1000);
+    acc1->setAutoRepeat(true);
+    acc1->setAutoRepeatDelay(1000);
+    acc2->setAutoRepeat(true);
+    acc2->setAutoRepeatDelay(1000);
+    acc3->setAutoRepeat(true);
+    acc3->setAutoRepeatDelay(1000);
     accGroup->addButton(acc0, 31);
     accGroup->addButton(acc1, 32);
     accGroup->addButton(acc2, 33);
     accGroup->addButton(acc3, 34);
+
+
     connect(accGroup, SIGNAL(buttonClicked(int)), SLOT(click(int)));
 
     //기어 버튼 그룹
@@ -244,7 +262,7 @@ void Widget::click(int id)
 
        //통신 시작 버튼
         case 61:
-            socket->connectToHost("192.168.100.49", 7777);
+            socket->connectToHost("192.168.100.38", 7777);
             SendStr = QString("controller");
             socket->write(SendStr.toUtf8(), SendStr.length()+1);
             break;
