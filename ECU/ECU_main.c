@@ -64,7 +64,7 @@ int readLine(int fd, char* str)
 
 int logging(char* str) // 로깅
 {
-	fprintf(stderr, "logging\n");
+	//fprintf(stderr, "logging\n");
 	// 로그 파일 열기
 	if((fp = fopen("ECU_log.txt","a"))==NULL)
 	{
@@ -72,13 +72,20 @@ int logging(char* str) // 로깅
 		exit(1);
 	}
 	fprintf(fp,"log : %s\n", str);
-	fprintf(stderr, "log : %s\n", str);
+	//fprintf(stderr, "log : %s\n", str);
 	fclose(fp);
 }
 
 void* naturalDeceleration()
 {
 	char tmp_msg[20], tmp_msg2[20];
+	memset(tmp_msg, 0x00, sizeof(tmp_msg));
+	memset(tmp_msg2, 0x00, sizeof(tmp_msg2));
+	sprintf(tmp_msg,"1 %d",current_total_distance);
+	AddQueue(tmp_msg, 0);
+	sprintf(tmp_msg,"2 %d",current_fuel);			
+	AddQueue(tmp_msg, 0);
+	dist_count = current_total_distance % 20;
 	while(1)
 	{
 		memset(tmp_msg, 0x00, sizeof(tmp_msg));
@@ -86,7 +93,8 @@ void* naturalDeceleration()
 		printf("current speed : %d\n", current_speed);
 		printf("RPM : %d\n", RPM);
 		nonActuator(); // -2km/h per second 
-		if(dist < 1){
+		if(dist < 1)
+		{
 			dist += (double)current_speed / 3600;
 			printf("[DEBUG] current_fuel : %d\n", current_fuel);
 			printf("[DEBUG] dist : %lf ,  current_total_distance : %d\n", dist, current_total_distance);
@@ -156,13 +164,15 @@ void* thRecver(void *arg)
 				AddQueue(send_msg, 0);
 				printf("wink !!!\n");
 			}else if(command == 4){
+				sprintf(send_msg,"6 %d", content);
+				AddQueue(send_msg, 0);
+				printf("Music !!!\n");
 				// TODO : Send music change signal.
 			}else if(command == 9){
 
 			}		
 			
-			//sprintf(send_msg,"6 %s",itoa(current_speed)); //Music Control information
-			//AddQueue(send_msg, 1);
+
 		}
 	}
 }
@@ -181,7 +191,7 @@ void AddQueue(char *str, int iFdNum)
 
 void* thSender()
 {	
-	fprintf(stderr, "t_sender\n");
+	//fprintf(stderr, "t_sender\n");
 	int iLenSend = 0;
 	while(1)
 	{
@@ -196,7 +206,7 @@ void* thSender()
 				iLenSend=write(fdSock[i], sQueue[i][iQueCurrentIdx[i]], strlen(sQueue[i][iQueCurrentIdx[i]]));
 				//iLenSend=write(fdSock[i], sQueue[i][iQueCurrentIdx[i]], strlen(sQueue[i][iQueCurrentIdx[i]])+1);
 				sprintf(sLogging, "send : %s\n", sQueue[i][iQueCurrentIdx[i]]);
-				fprintf(stderr, "sended\n");
+				//fprintf(stderr, "sended\n");
 				logging(sLogging);
 				iQueCurrentIdx[i]++;
 				if(iQueCurrentIdx[i] >= MAXQUEUECNT)
@@ -274,21 +284,27 @@ int main(int argc, char* argv[])
 
 		if(!(strcmp(onoff_msg,"cluster")))
 		{
+			printf("=============================\n");
 			printf("Cluster On\n");
+			printf("=============================\n");
 			fdSock[0] = connfd;
 			thr_arg = 0;
 		}
 
 		else if(!(strcmp(onoff_msg,"controller")))
 		{
+			printf("=============================\n");
 			printf("Controller On\n");
+			printf("=============================\n");
 			fdSock[1] = connfd;
 			thr_arg = 1;
 		}
 
 		else if(!(strcmp(onoff_msg,"engine")))
 		{
+			printf("=============================\n");
 			printf("Engine On\n");
+			printf("=============================\n");
 			fdSock[2] = connfd;
 			thr_arg = 2;
 		}
